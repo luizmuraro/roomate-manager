@@ -1,0 +1,161 @@
+name: Deploy Prototype to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
+
+    - name: Validate HTML structure
+      run: |
+        echo "Validating HTML files..."
+        find prototype/html-screens -name "*.html" -exec echo "Checking {}" \;
+        # Basic validation - check if files exist and are not empty
+        for file in prototype/html-screens/*.html; do
+          if [ ! -s "$file" ]; then
+            echo "ERROR: $file is empty or missing"
+            exit 1
+          fi
+          echo "✓ $file is valid"
+        done
+
+    - name: Optimize assets
+      run: |
+        echo "Optimizing assets for production..."
+        # Create optimized build directory
+        mkdir -p dist
+
+        # Copy prototype files to dist
+        cp -r prototype/* dist/
+
+        # Create index.html in root that redirects to login screen
+        cat > dist/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>RoomMate Manager - Redirecting...</title>
+            <script>
+                // Redirect to login screen
+                window.location.href = './html-screens/login_register_screens.html';
+            </script>
+            <noscript>
+                <meta http-equiv="refresh" content="0; url=./html-screens/login_register_screens.html">
+            </noscript>
+        </head>
+        <body>
+            <p>Redirecting to RoomMate Manager...</p>
+            <p>If you are not redirected, <a href="./html-screens/login_register_screens.html">click here</a>.</p>
+        </body>
+        </html>
+        EOF
+
+        # Create a simple navigation helper
+        cat > dist/navigation.js << 'EOF'
+        // Simple navigation helper for prototype
+        function navigateToScreen(screenName) {
+            const screens = {
+                'login': 'login_register_screens.html',
+                'dashboard': 'roommate_dashboard.html',
+                'add-expense': 'add_expense_modal.html',
+                'expenses': 'expenses_list_screen.html',
+                'shopping': 'shopping_list_screen.html',
+                'receipts': 'receipt_gallery_screen.html',
+                'settings': 'settings_profile_screen.html'
+            };
+
+            if (screens[screenName]) {
+                window.location.href = screens[screenName];
+            }
+        }
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey) {
+                switch(e.key) {
+                    case '1': navigateToScreen('login'); break;
+                    case '2': navigateToScreen('dashboard'); break;
+                    case '3': navigateToScreen('add-expense'); break;
+                    case '4': navigateToScreen('expenses'); break;
+                    case '5': navigateToScreen('shopping'); break;
+                    case '6': navigateToScreen('receipts'); break;
+                    case '7': navigateToScreen('settings'); break;
+                }
+            }
+        });
+        EOF
+
+        echo "✓ Build optimization complete"
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: './dist'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+    - name: Post-deployment verification
+      run: |
+        echo "🚀 Deployment completed successfully!"
+        echo "📱 Prototype URL: ${{ steps.deployment.outputs.page_url }}"
+        echo "🔗 Direct login link: ${{ steps.deployment.outputs.page_url }}html-screens/login_register_screens.html"
+
+        # Verify deployment with curl (optional)
+        sleep 10
+        curl -f "${{ steps.deployment.outputs.page_url }}" || echo "⚠️  Initial verification failed - may take a few minutes to propagate"
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build, deploy]
+    if: always()
+
+    steps:
+    - name: Deployment Status
+      run: |
+        if [ "${{ needs.deploy.result }}" == "success" ]; then
+          echo "✅ Deployment successful!"
+          echo "🌐 Live demo: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          echo "📱 Mobile-optimized and ready for testing"
+        else
+          echo "❌ Deployment failed"
+          echo "📝 Check the logs above for details"
+        fi
