@@ -106,13 +106,19 @@ Visit our [live demo](https://your-username.github.io/roommate-manager) to see t
 
 | Screen | Description |
 |--------|-------------|
-| ![Login](docs/screenshots/login.png) | Authentication & Registration |
-| ![Dashboard](docs/screenshots/dashboard.png) | Roommate Expense Overview |
-| ![Add Expense](docs/screenshots/add-expense.png) | Smart Expense Addition |
-| ![Expenses List](docs/screenshots/expenses-list.png) | Comprehensive Expense Management |
-| ![Shopping List](docs/screenshots/shopping-list.png) | Collaborative Shopping |
-| ![Receipt Gallery](docs/screenshots/receipt-gallery.png) | Digital Receipt Management |
-| ![Settings](docs/screenshots/settings.png) | Profile & Configuration |
+| ![Sign In](docs/screenshots/sign-in.jpeg) | Authentication – Sign In |
+| ![Sign Up](docs/screenshots/sign-up.jpeg) | Authentication – Sign Up |
+| ![Dashboard](docs/screenshots/dashboard.jpeg) | Roommate Expense Overview |
+| ![Add Expense - Step 1](docs/screenshots/add-expense-modal-pt-1.jpeg) | Smart Expense Addition (Step 1) |
+| ![Add Expense - Step 2](docs/screenshots/add-expense-modal-pt-2.jpeg) | Smart Expense Addition (Step 2) |
+| ![Expenses List](docs/screenshots/expenses-list.jpeg) | Comprehensive Expense Management |
+| ![Shopping List](docs/screenshots/shopping-list.jpeg) | Collaborative Shopping |
+| ![Receipt Gallery - Part 1](docs/screenshots/receipt-gallery-pt-1.jpeg) | Digital Receipt Management (Part 1) |
+| ![Receipt Gallery - Part 2](docs/screenshots/receipt-gallery-pt-2.jpeg) | Digital Receipt Management (Part 2) |
+| ![Settings - Profile](docs/screenshots/settings-profile.jpeg) | Settings – Profile |
+| ![Settings - Roommate](docs/screenshots/settings-roomate.jpeg) | Settings – Roommate |
+| ![Settings - Privacy](docs/screenshots/settings-privacy.jpeg) | Settings – Privacy |
+| ![Settings - Notifications](docs/screenshots/settings-notification.jpeg) | Settings – Notifications |
 
 *Screenshots will be added to complete the documentation.*
 
