@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomMate Manager - Add Expense Modal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .modal-backdrop {
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .file-upload-area {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        .file-upload-area.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Demo Background (simula uma tela existente) -->
+    <div class="p-8">
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">Dashboard</h1>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="font-semibold text-gray-900 mb-2">Total Expenses</h3>
+                <p class="text-2xl font-bold text-gray-900">R$ 2.450,00</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="font-semibold text-gray-900 mb-2">You Owe</h3>
+                <p class="text-2xl font-bold text-red-600">R$ 245,50</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="font-semibold text-gray-900 mb-2">Current Balance</h3>
+                <p class="text-2xl font-bold text-orange-600">5</p>
+            </div>
+        </div>
+        
+        <!-- Floating Add Button -->
+        <button 
+            onclick="openModal()" 
+            class="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-40"
+            title="Add Expense"
+        >
+            <i class="fas fa-plus text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Modal Backdrop -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden z-50" onclick="closeModal()"></div>
+
+    <!-- Add Expense Modal -->
+    <div id="expense-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl modal-content" onclick="event.stopPropagation()">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-receipt text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">Add New Expense</h2>
+                        <p class="text-sm text-gray-500">Split a new expense with your roommate</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-times text-gray-500"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6">
+                <form class="space-y-6">
+                    <!-- Basic Information -->
+                    <div class="space-y-4">
+                        <!-- Expense Title -->
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+                                What did you spend on? *
+                            </label>
+                            <input 
+                                type="text" 
+                                id="title" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="e.g., Grocery Shopping, Electricity Bill"
+                                required
+                            >
+                        </div>
+
+                        <!-- Amount and Category -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Amount -->
+                            <div>
+                                <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Total Amount *
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-500">R$</span>
+                                    <input 
+                                        type="number" 
+                                        id="amount" 
+                                        step="0.01"
+                                        class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="0.00"
+                                        required
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Category -->
+                            <div>
+                                <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Category (optional)
+                                </label>
+                                <select 
+                                    id="category" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">Select category</option>
+                                    <option value="groceries">🛒 Groceries</option>
+                                    <option value="utilities">⚡ Utilities</option>
+                                    <option value="rent">🏠 Rent</option>
+                                    <option value="household">🧽 Household Items</option>
+                                    <option value="food">🍕 Food & Dining</option>
+                                    <option value="transport">🚗 Transportation</option>
+                                    <option value="entertainment">🎬 Entertainment</option>
+                                    <option value="other">📦 Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Date and Paid By -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Date -->
+                            <div>
+                                <label for="date" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Date *
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="date" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="dd/mm/yyyy"
+                                    pattern="\d{2}/\d{2}/\d{4}"
+                                    required
+                                >
+                            </div>
+
+                            <!-- Paid by -->
+                            <div>
+                                <label for="paid-by" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Paid by *
+                                </label>
+                                <select 
+                                    id="paid-by" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    required
+                                >
+                                    <option value="you">You</option>
+                                    <option value="alex">Alex Silva</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Split Options -->
+                    <div class="border-t pt-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">How should this be split?</h3>
+                        
+                        <div class="space-y-3">
+                            <!-- Split Equally -->
+                            <label class="flex items-start space-x-3 p-4 border-2 border-blue-200 bg-blue-50 rounded-xl cursor-pointer">
+                                <input type="radio" name="split-type" value="equal" class="mt-1" checked>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-medium text-gray-900">Split equally</span>
+                                        <span class="text-sm text-blue-600 font-medium">Recommended</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1">Each person pays 50% of the total amount</p>
+                                    <div class="mt-3 space-y-2">
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-gray-600">You:</span>
+                                            <span class="font-medium">R$ <span id="your-split">0.00</span></span>
+                                        </div>
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-gray-600">Alex Silva:</span>
+                                            <span class="font-medium">R$ <span id="alex-split">0.00</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <!-- Custom Split -->
+                            <label class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="split-type" value="custom" class="mt-1">
+                                <div class="flex-1">
+                                    <span class="font-medium text-gray-900">Custom split</span>
+                                    <p class="text-sm text-gray-600 mt-1">Specify different amounts for each person</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Receipt Upload -->
+                    <div class="border-t pt-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Receipt (optional)</h3>
+                        
+                        <div id="file-upload-area" class="file-upload-area p-6 rounded-xl text-center cursor-pointer">
+                            <div id="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt text-gray-400 text-2xl mb-3"></i>
+                                <p class="text-gray-600 mb-2">
+                                    <span class="font-medium text-blue-600">Click to upload</span> or drag and drop
+                                </p>
+                                <p class="text-sm text-gray-500">PNG, JPG, PDF up to 10MB</p>
+                            </div>
+                            
+                            <div id="upload-preview" class="hidden">
+                                <img id="preview-image" src="" alt="Receipt preview" class="max-w-full max-h-32 mx-auto rounded-lg mb-3">
+                                <p class="text-sm text-gray-600 mb-2">
+                                    <i class="fas fa-file-image text-green-600 mr-2"></i>
+                                    <span id="file-name"></span>
+                                </p>
+                                <button type="button" onclick="removeFile()" class="text-red-600 text-sm hover:text-red-700">
+                                    <i class="fas fa-trash mr-1"></i>Remove
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <input type="file" id="receipt-file" accept="image/*,.pdf" class="hidden">
+                        
+                        <!-- OCR Feature Teaser -->
+                        <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-magic text-yellow-600"></i>
+                                <span class="text-sm font-medium text-yellow-800">Coming Soon: Smart Receipt Scanner</span>
+                            </div>
+                            <p class="text-xs text-yellow-600 mt-1">
+                                Automatically extract expense details from receipts using AI
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+                <button 
+                    type="button" 
+                    onclick="closeModal()"
+                    class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                >
+                    Cancel
+                </button>
+                <button 
+                    type="submit" 
+                    onclick="submitExpense()"
+                    class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                >
+                    <i class="fas fa-plus mr-2"></i>
+                    Add Expense
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            document.getElementById('expense-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // Set today's date
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            document.getElementById('date').value = `${day}/${month}/${year}`;
+        }
+
+        function closeModal() {
+            document.getElementById('modal-backdrop').classList.add('hidden');
+            document.getElementById('expense-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            
+            // Reset form
+            document.querySelector('form').reset();
+            resetFileUpload();
+        }
+
+        function submitExpense() {
+            const title = document.getElementById('title').value;
+            const amount = document.getElementById('amount').value;
+            
+            if (!title || !amount) {
+                alert('Please fill in required fields');
+                return;
+            }
+            
+            // Simulate saving
+            alert(`Expense "${title}" of R$ ${amount} added successfully!`);
+            closeModal();
+        }
+
+        // Date input formatting
+        const dateInput = document.getElementById('date');
+        dateInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 3 && value.length <= 4) {
+                value = value.replace(/(\d{2})(\d{1,2})/, '$1/$2');
+            } else if (value.length >= 5) {
+                value = value.replace(/(\d{2})(\d{2})(\d{4})/, '$1/$2/$3');
+            }
+            if (value.length <= 10) {
+                e.target.value = value;
+            }
+        });
+
+        // Calculate split amounts
+        const amountInput = document.getElementById('amount');
+        const yourSplit = document.getElementById('your-split');
+        const alexSplit = document.getElementById('alex-split');
+
+        amountInput.addEventListener('input', () => {
+            const amount = parseFloat(amountInput.value) || 0;
+            const half = (amount / 2).toFixed(2);
+            yourSplit.textContent = half;
+            alexSplit.textContent = half;
+        });
+
+        // File upload handling
+        const fileUploadArea = document.getElementById('file-upload-area');
+        const fileInput = document.getElementById('receipt-file');
+        const uploadPlaceholder = document.getElementById('upload-placeholder');
+        const uploadPreview = document.getElementById('upload-preview');
+        const previewImage = document.getElementById('preview-image');
+        const fileName = document.getElementById('file-name');
+
+        fileUploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (file && (file.type.startsWith('image/') || file.type === 'application/pdf')) {
+                fileName.textContent = file.name;
+                
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        previewImage.src = e.target.result;
+                        uploadPlaceholder.classList.add('hidden');
+                        uploadPreview.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNmM2Y0ZjYiLz48dGV4dCB4PSI1MCIgeT0iNTUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzM3NDE1MSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UERGPC90ZXh0Pjwvc3ZnPg==';
+                    uploadPlaceholder.classList.add('hidden');
+                    uploadPreview.classList.remove('hidden');
+                }
+            }
+        }
+
+        function removeFile() {
+            resetFileUpload();
+        }
+
+        function resetFileUpload() {
+            fileInput.value = '';
+            uploadPlaceholder.classList.remove('hidden');
+            uploadPreview.classList.add('hidden');
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomMate Manager - Expenses List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .expense-row {
+            transition: all 0.2s ease;
+        }
+        .expense-row:hover {
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+        }
+        .date-picker-wrapper {
+            position: relative;
+        }
+        .date-picker {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            padding: 1rem;
+            display: none;
+        }
+        .date-picker.active {
+            display: block;
+        }
+        .quick-filter {
+            @apply px-4 py-2.5 text-sm font-medium rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 bg-white shadow-sm;
+        }
+        .quick-filter.active {
+            @apply bg-blue-600 text-white border-blue-600 shadow-md transform scale-105;
+        }
+        .date-quick-filter {
+            @apply px-4 py-2.5 text-sm font-medium rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-all duration-200 bg-white shadow-sm;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Header -->
+    <header class="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <h1 class="text-lg font-semibold text-gray-900">Expenses</h1>
+            <button onclick="openFilters()" class="p-2 hover:bg-gray-100 rounded-lg">
+                <i class="fas fa-filter text-gray-600"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex">
+        <!-- Desktop Sidebar -->
+        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:bg-white lg:border-r lg:border-gray-200">
+            <div class="flex-1 flex flex-col min-h-0">
+                <div class="flex items-center h-16 px-6 border-b border-gray-200">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-home text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-xl font-bold text-gray-900">RoomMate</h1>
+                    </div>
+                </div>
+                <nav class="flex-1 px-4 py-4 space-y-2">
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-chart-line w-5 mr-3 text-center"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" class="bg-blue-50 text-blue-700 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-dollar-sign w-5 mr-3 text-center"></i>
+                        Expenses
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-shopping-cart w-5 mr-3 text-center"></i>
+                        Shopping Lists
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-receipt w-5 mr-3 text-center"></i>
+                        Receipts
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 lg:pl-64">
+            <div class="px-4 py-6 lg:px-8">
+                <!-- Header -->
+                <div class="mb-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">All Expenses</h1>
+                            <p class="text-gray-600 mt-1">Track and manage your shared expenses</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0">
+                            <button onclick="addExpense()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                Add Expense
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Filters -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <!-- Search and Main Filters -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <!-- Search -->
+                        <div class="md:col-span-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    id="search"
+                                    placeholder="Search expenses..."
+                                    class="w-full px-4 py-2.5 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors"
+                                >
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+
+                        <!-- Category Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                            <select id="category-filter" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors">
+                                <option value="">All Categories</option>
+                                <option value="groceries">🛒 Groceries</option>
+                                <option value="utilities">⚡ Utilities</option>
+                                <option value="rent">🏠 Rent</option>
+                                <option value="household">🧽 Household</option>
+                                <option value="food">🍕 Food & Dining</option>
+                                <option value="transport">🚗 Transportation</option>
+                                <option value="entertainment">🎬 Entertainment</option>
+                                <option value="other">📦 Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                            <select id="status-filter" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors">
+                                <option value="">All Status</option>
+                                <option value="current">📋 Current Balance</option>
+                                <option value="settled">✅ Settled (Paid)</option>
+                            </select>
+                        </div>
+
+                        <!-- Date Range -->
+                        <div class="date-picker-wrapper">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+                            <button 
+                                id="date-range-btn"
+                                onclick="toggleDatePicker()"
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 hover:bg-white transition-colors text-left flex items-center justify-between"
+                            >
+                                <span id="date-range-text">All Time</span>
+                                <i class="fas fa-calendar-alt text-gray-400"></i>
+                            </button>
+                            
+                            <!-- Date Picker Dropdown -->
+                            <div id="date-picker" class="date-picker">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Quick Filters</label>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button onclick="setDateRange('this-month')" class="date-quick-filter">This Month</button>
+                                            <button onclick="setDateRange('last-month')" class="date-quick-filter">Last Month</button>
+                                            <button onclick="setDateRange('last-3-months')" class="date-quick-filter">Last 3 Months</button>
+                                            <button onclick="setDateRange('this-year')" class="date-quick-filter">This Year</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="border-t pt-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Custom Range</label>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="block text-xs text-gray-500 mb-1">From</label>
+                                                <input type="date" id="date-from" class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs text-gray-500 mb-1">To</label>
+                                                <input type="date" id="date-to" class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 flex justify-between">
+                                            <button onclick="clearDateRange()" class="text-sm text-gray-600 hover:text-gray-800">Clear</button>
+                                            <button onclick="applyCustomRange()" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">Apply</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Filters - Styled -->
+                    <div class="border-t pt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-4">Quick Filters</label>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="quick-filter active" data-filter="all">
+                                <i class="fas fa-list mr-2"></i>All
+                            </button>
+                            <button class="quick-filter" data-filter="you-paid">
+                                <i class="fas fa-user mr-2"></i>You Paid
+                            </button>
+                            <button class="quick-filter" data-filter="alex-paid">
+                                <i class="fas fa-user-friends mr-2"></i>Alex Paid
+                            </button>
+                            <button class="quick-filter" data-filter="high-value">
+                                <i class="fas fa-arrow-up mr-2"></i>High Value (>R$100)
+                            </button>
+                            <button class="quick-filter" data-filter="current-balance">
+                                <i class="fas fa-clock mr-2"></i>Current Balance
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Cards - Compact -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-receipt text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Total Expenses</p>
+                                <p class="text-xl font-bold text-gray-900">R$ 2.450,00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-arrow-down text-red-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">You Owe</p>
+                                <p class="text-xl font-bold text-red-600">R$ 245,50</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-clock text-orange-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Current Balance</p>
+                                <p class="text-xl font-bold text-orange-600">5</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expenses Table - Compact Design -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <!-- Table Header -->
+                    <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
+                        <div class="grid grid-cols-12 gap-4 text-xs font-medium text-gray-600 uppercase tracking-wider">
+                            <div class="col-span-4">Expense</div>
+                            <div class="col-span-2 text-center">Amount</div>
+                            <div class="col-span-2 text-center">Your Share</div>
+                            <div class="col-span-2 text-center">Status</div>
+                            <div class="col-span-2 text-center">Actions</div>
+                        </div>
+                    </div>
+
+                    <!-- Expenses List - Compact Rows -->
+                    <div class="divide-y divide-gray-100">
+                        <!-- Expense Row 1 -->
+                        <div class="expense-row px-6 py-4 border-l-4 border-l-orange-400">
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <!-- Expense Info -->
+                                <div class="col-span-4 flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-shopping-bag text-blue-600 text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-semibold text-gray-900 text-sm">Grocery Shopping</p>
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 mt-1">
+                                            <span><i class="fas fa-calendar mr-1"></i>15/09/2025</span>
+                                            <span><i class="fas fa-user mr-1"></i>Alex Silva</span>
+                                            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">Groceries</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Amount -->
+                                <div class="col-span-2 text-center">
+                                    <p class="font-semibold text-gray-900">R$ 127,80</p>
+                                </div>
+                                
+                                <!-- Your Share -->
+                                <div class="col-span-2 text-center">
+                                    <p class="font-semibold text-red-600">R$ 63,90</p>
+                                    <p class="text-xs text-gray-500">50%</p>
+                                </div>
+                                
+                                <!-- Status -->
+                                <div class="col-span-2 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                        <i class="fas fa-clock mr-1"></i>Pending
+                                    </span>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-receipt mr-1"></i>Receipt available
+                                    </p>
+                                </div>
+                                
+                                <!-- Actions -->
+                                <div class="col-span-2 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-700 p-1" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                       
+                                        <button class="text-gray-600 hover:text-gray-700 p-1" title="More Options">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expense Row 2 -->
+                        <div class="expense-row px-6 py-4 border-l-4 border-l-green-400">
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-4 flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-bolt text-green-600 text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-semibold text-gray-900 text-sm">Electricity Bill</p>
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 mt-1">
+                                            <span><i class="fas fa-calendar mr-1"></i>14/09/2025</span>
+                                            <span><i class="fas fa-user mr-1"></i>You</span>
+                                            <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Utilities</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <p class="font-semibold text-gray-900">R$ 180,00</p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <p class="font-semibold text-green-600">+R$ 90,00</p>
+                                    <p class="text-xs text-gray-500">50%</p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check mr-1"></i>Settled
+                                    </span>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-check-circle mr-1 text-green-500"></i>Paid by Alex
+                                    </p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-700 p-1" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-700 p-1" title="More Options">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add more rows here... -->
+                        <div class="expense-row px-6 py-4 border-l-4 border-l-yellow-400">
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-4 flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-coffee text-orange-600 text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-semibold text-gray-900 text-sm">Coffee & Snacks</p>
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 mt-1">
+                                            <span><i class="fas fa-calendar mr-1"></i>13/09/2025</span>
+                                            <span><i class="fas fa-user mr-1"></i>Alex Silva</span>
+                                            <span class="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full">Food</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <p class="font-semibold text-gray-900">R$ 45,20</p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <p class="font-semibold text-red-600">R$ 22,60</p>
+                                    <p class="text-xs text-gray-500">50%</p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-adjust mr-1"></i>Partial
+                                    </span>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-times mr-1 text-red-500"></i>No receipt
+                                    </p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-700 p-1" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                       
+                                        <button class="text-gray-600 hover:text-gray-700 p-1" title="More Options">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add 3 more rows for better density demonstration -->
+                        <div class="expense-row px-6 py-4 border-l-4 border-l-purple-400">
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-4 flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-home text-purple-600 text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-semibold text-gray-900 text-sm">Monthly Rent</p>
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 mt-1">
+                                            <span><i class="fas fa-calendar mr-1"></i>01/09/2025</span>
+                                            <span><i class="fas fa-user mr-1"></i>You</span>
+                                            <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">Rent</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <p class="font-semibold text-gray-900">R$ 1.800,00</p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <p class="font-semibold text-green-600">+R$ 900,00</p>
+                                    <p class="text-xs text-gray-500">50%</p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check mr-1"></i>Settled
+                                    </span>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-check-circle mr-1 text-green-500"></i>Paid by Alex
+                                    </p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-700 p-1" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-700 p-1" title="More Options">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="expense-row px-6 py-4 border-l-4 border-l-blue-400">
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-4 flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-gas-pump text-blue-600 text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-semibold text-gray-900 text-sm">Gas Station</p>
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 mt-1">
+                                            <span><i class="fas fa-calendar mr-1"></i>12/09/2025</span>
+                                            <span><i class="fas fa-user mr-1"></i>You</span>
+                                            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">Transport</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <p class="font-semibold text-gray-900">R$ 85,00</p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <p class="font-semibold text-green-600">+R$ 42,50</p>
+                                    <p class="text-xs text-gray-500">50%</p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                        <i class="fas fa-clock mr-1"></i>Pending
+                                    </span>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-receipt mr-1"></i>Receipt available
+                                    </p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-700 p-1" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                       
+                                        <button class="text-gray-600 hover:text-gray-700 p-1" title="More Options">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="expense-row px-6 py-4 border-l-4 border-l-pink-400">
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-4 flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-wifi text-pink-600 text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-semibold text-gray-900 text-sm">Internet Bill</p>
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 mt-1">
+                                            <span><i class="fas fa-calendar mr-1"></i>10/09/2025</span>
+                                            <span><i class="fas fa-user mr-1"></i>Alex Silva</span>
+                                            <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Utilities</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <p class="font-semibold text-gray-900">R$ 120,00</p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <p class="font-semibold text-red-600">R$ 60,00</p>
+                                    <p class="text-xs text-gray-500">50%</p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check mr-1"></i>Settled
+                                    </span>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-check-circle mr-1 text-green-500"></i>Paid by You
+                                    </p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-700 p-1" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-700 p-1" title="More Options">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Pagination -->
+                <div class="mt-6 flex items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <p class="text-sm text-gray-600">
+                            Showing <span class="font-semibold">1-6</span> of <span class="font-semibold">18</span> expenses
+                        </p>
+                        <select class="text-sm border border-gray-300 rounded px-2 py-1">
+                            <option>6 per page</option>
+                            <option>12 per page</option>
+                            <option>24 per page</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50" disabled>
+                            <i class="fas fa-chevron-left mr-1"></i>Previous
+                        </button>
+                        <button class="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">1</button>
+                        <button class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">2</button>
+                        <button class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">3</button>
+                        <span class="px-2 text-gray-400">...</span>
+                        <button class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">8</button>
+                        <button class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Next<i class="fas fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div class="grid grid-cols-5 py-2">
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-chart-line"></i>
+                <span class="text-xs mt-1">Dashboard</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-blue-600">
+                <i class="fas fa-dollar-sign"></i>
+                <span class="text-xs mt-1">Expenses</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <div class="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center">
+                    <i class="fas fa-plus text-xs"></i>
+                </div>
+                <span class="text-xs mt-1">Add</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="text-xs mt-1">Lists</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-user"></i>
+                <span class="text-xs mt-1">Profile</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        let datePickerOpen = false;
+
+        function addExpense() {
+            alert('Navigate to Add Expense page');
+        }
+
+        function openFilters() {
+            alert('Open mobile filters modal');
+        }
+
+        function toggleDatePicker() {
+            const datePicker = document.getElementById('date-picker');
+            datePickerOpen = !datePickerOpen;
+            
+            if (datePickerOpen) {
+                datePicker.classList.add('active');
+            } else {
+                datePicker.classList.remove('active');
+            }
+        }
+
+        function setDateRange(range) {
+            const dateText = document.getElementById('date-range-text');
+            const ranges = {
+                'this-month': 'This Month',
+                'last-month': 'Last Month', 
+                'last-3-months': 'Last 3 Months',
+                'this-year': 'This Year'
+            };
+            
+            dateText.textContent = ranges[range];
+            toggleDatePicker();
+            console.log('Date range set to:', range);
+        }
+
+        function clearDateRange() {
+            document.getElementById('date-range-text').textContent = 'All Time';
+            document.getElementById('date-from').value = '';
+            document.getElementById('date-to').value = '';
+            toggleDatePicker();
+        }
+
+        function applyCustomRange() {
+            const fromDate = document.getElementById('date-from').value;
+            const toDate = document.getElementById('date-to').value;
+            
+            if (fromDate && toDate) {
+                const fromFormatted = new Date(fromDate).toLocaleDateString('pt-BR');
+                const toFormatted = new Date(toDate).toLocaleDateString('pt-BR');
+                document.getElementById('date-range-text').textContent = `${fromFormatted} - ${toFormatted}`;
+            }
+            
+            toggleDatePicker();
+            console.log('Custom range applied:', fromDate, 'to', toDate);
+        }
+
+        // Close date picker when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.date-picker-wrapper') && datePickerOpen) {
+                toggleDatePicker();
+            }
+        });
+
+        // Quick filters functionality
+        const quickFilters = document.querySelectorAll('.quick-filter');
+        quickFilters.forEach(filter => {
+            filter.addEventListener('click', () => {
+                quickFilters.forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+                
+                const filterType = filter.dataset.filter;
+                console.log('Filtering by:', filterType);
+            });
+        });
+
+        // Search functionality
+        document.getElementById('search').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            console.log('Searching for:', searchTerm);
+        });
+
+        // Filter dropdowns
+        document.getElementById('category-filter').addEventListener('change', (e) => {
+            console.log('Category filter:', e.target.value);
+        });
+
+        document.getElementById('status-filter').addEventListener('change', (e) => {
+            console.log('Status filter:', e.target.value);
+        });
+
+        // Expense actions
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('button[title="View Details"]')) {
+                alert('View expense details');
+            } else if (e.target.closest('button[title="Mark as Settled"]')) {
+                alert('Mark as settled');
+            } else if (e.target.closest('button[title="More Options"]')) {
+                alert('Show more options menu');
+            }
+        });
+    </script>
+</body>
+</html>

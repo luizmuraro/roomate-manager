@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomMate Manager - Receipt Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .receipt-card {
+            transition: all 0.2s ease;
+        }
+        .receipt-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .receipt-preview {
+            aspect-ratio: 3/4;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .quick-filter {
+            @apply px-4 py-2.5 text-sm font-medium rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 bg-white shadow-sm;
+        }
+        .quick-filter.active {
+            @apply bg-blue-600 text-white border-blue-600 shadow-md transform scale-105;
+        }
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        .upload-area.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Header -->
+    <header class="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <h1 class="text-lg font-semibold text-gray-900">Receipts</h1>
+            <button onclick="openUploadModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+                <i class="fas fa-plus text-gray-600"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex">
+        <!-- Desktop Sidebar -->
+        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:bg-white lg:border-r lg:border-gray-200">
+            <div class="flex-1 flex flex-col min-h-0">
+                <div class="flex items-center h-16 px-6 border-b border-gray-200">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-home text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-xl font-bold text-gray-900">RoomMate</h1>
+                    </div>
+                </div>
+                <nav class="flex-1 px-4 py-4 space-y-2">
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-chart-line w-5 mr-3 text-center"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-dollar-sign w-5 mr-3 text-center"></i>
+                        Expenses
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-shopping-cart w-5 mr-3 text-center"></i>
+                        Shopping Lists
+                    </a>
+                    <a href="#" class="bg-blue-50 text-blue-700 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-receipt w-5 mr-3 text-center"></i>
+                        Receipts
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 lg:pl-64">
+            <div class="px-4 py-6 lg:px-8">
+                <!-- Header -->
+                <div class="mb-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Receipt Gallery</h1>
+                            <p class="text-gray-600 mt-1">Organize and view all your expense receipts</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0 hidden lg:block">
+                            <button onclick="openUploadModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-upload mr-2"></i>
+                                Upload Receipt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Upload Area -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <div class="p-4">
+                        <div class="upload-area p-6 rounded-lg text-center cursor-pointer" onclick="triggerFileInput()">
+                            <i class="fas fa-cloud-upload-alt text-gray-400 text-2xl mb-2"></i>
+                            <p class="text-gray-600 mb-1">
+                                <span class="font-medium text-blue-600">Click to upload</span> or drag and drop
+                            </p>
+                            <p class="text-xs text-gray-500">PNG, JPG, PDF up to 10MB</p>
+                        </div>
+                        <input type="file" id="receipt-upload" accept="image/*,.pdf" multiple class="hidden">
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div class="flex flex-wrap gap-3">
+                            <button class="quick-filter active" data-filter="all">
+                                <i class="fas fa-images mr-2"></i>All (24)
+                            </button>
+                            <button class="quick-filter" data-filter="recent">
+                                <i class="fas fa-clock mr-2"></i>Recent
+                            </button>
+                            <button class="quick-filter" data-filter="groceries">
+                                <i class="fas fa-shopping-bag mr-2"></i>Groceries
+                            </button>
+                            <button class="quick-filter" data-filter="utilities">
+                                <i class="fas fa-bolt mr-2"></i>Utilities
+                            </button>
+                            <button class="quick-filter" data-filter="unlinked">
+                                <i class="fas fa-unlink mr-2"></i>Unlinked (3)
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                <option>Sort by Date</option>
+                                <option>Sort by Amount</option>
+                                <option>Sort by Category</option>
+                            </select>
+                            <button class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50" title="Grid View">
+                                <i class="fas fa-th text-gray-600"></i>
+                            </button>
+                            <button class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 bg-blue-50 text-blue-600" title="List View">
+                                <i class="fas fa-list text-blue-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Receipt Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+                    <!-- Receipt 1 -->
+                    <div class="receipt-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden cursor-pointer" onclick="openReceiptModal('receipt1')">
+                        <div class="receipt-preview flex items-center justify-center">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNmM2Y0ZjYiLz48dGV4dCB4PSI1MCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzM3NDE1MSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UkVDRUlQVDwvdGV4dD48L3N2Zz4=" 
+                                 alt="Receipt preview" class="w-full h-full object-cover rounded">
+                        </div>
+                        <div class="p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-gray-900 text-sm">Grocery Shopping</span>
+                                <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">🛒</span>
+                            </div>
+                            <div class="text-xs text-gray-500 space-y-1">
+                                <div class="flex justify-between">
+                                    <span>Amount:</span>
+                                    <span class="font-medium">R$ 127,80</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Date:</span>
+                                    <span>15/09/2025</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Linked:</span>
+                                    <span class="text-blue-600"><i class="fas fa-link mr-1"></i>Expense #123</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receipt 2 -->
+                    <div class="receipt-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden cursor-pointer" onclick="openReceiptModal('receipt2')">
+                        <div class="receipt-preview flex items-center justify-center">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNmZWY0ZTciLz48dGV4dCB4PSI1MCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzg5MmQxMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RUxFQ1RSSUNJVFk8L3RleHQ+PC9zdmc+" 
+                                 alt="Receipt preview" class="w-full h-full object-cover rounded">
+                        </div>
+                        <div class="p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-gray-900 text-sm">Electricity Bill</span>
+                                <span class="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded text-xs">⚡</span>
+                            </div>
+                            <div class="text-xs text-gray-500 space-y-1">
+                                <div class="flex justify-between">
+                                    <span>Amount:</span>
+                                    <span class="font-medium">R$ 180,00</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Date:</span>
+                                    <span>14/09/2025</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Linked:</span>
+                                    <span class="text-blue-600"><i class="fas fa-link mr-1"></i>Expense #124</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receipt 3 -->
+                    <div class="receipt-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden cursor-pointer" onclick="openReceiptModal('receipt3')">
+                        <div class="receipt-preview flex items-center justify-center">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNmMGY5ZmYiLz48dGV4dCB4PSI1MCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzEzNjVkNCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UkVTVEFVUkFOVDwvdGV4dD48L3N2Zz4=" 
+                                 alt="Receipt preview" class="w-full h-full object-cover rounded">
+                        </div>
+                        <div class="p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-gray-900 text-sm">Restaurant Dinner</span>
+                                <span class="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-xs">🍕</span>
+                            </div>
+                            <div class="text-xs text-gray-500 space-y-1">
+                                <div class="flex justify-between">
+                                    <span>Amount:</span>
+                                    <span class="font-medium">R$ 85,40</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Date:</span>
+                                    <span>13/09/2025</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Linked:</span>
+                                    <span class="text-red-600"><i class="fas fa-unlink mr-1"></i>Unlinked</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receipt 4 -->
+                    <div class="receipt-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden cursor-pointer" onclick="openReceiptModal('receipt4')">
+                        <div class="receipt-preview flex items-center justify-center">
+                            <i class="fas fa-file-pdf text-red-500 text-3xl"></i>
+                        </div>
+                        <div class="p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-gray-900 text-sm">Gas Station</span>
+                                <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">🚗</span>
+                            </div>
+                            <div class="text-xs text-gray-500 space-y-1">
+                                <div class="flex justify-between">
+                                    <span>Amount:</span>
+                                    <span class="font-medium">R$ 75,00</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Date:</span>
+                                    <span>12/09/2025</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Linked:</span>
+                                    <span class="text-blue-600"><i class="fas fa-link mr-1"></i>Expense #125</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receipt 5 -->
+                    <div class="receipt-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden cursor-pointer" onclick="openReceiptModal('receipt5')">
+                        <div class="receipt-preview flex items-center justify-center">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNmNWYzZmYiLz48dGV4dCB4PSI1MCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzhiM2QzZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UEhBUk1BQ1k8L3RleHQ+PC9zdmc+" 
+                                 alt="Receipt preview" class="w-full h-full object-cover rounded">
+                        </div>
+                        <div class="p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-gray-900 text-sm">Pharmacy</span>
+                                <span class="px-2 py-0.5 bg-pink-100 text-pink-700 rounded text-xs">💊</span>
+                            </div>
+                            <div class="text-xs text-gray-500 space-y-1">
+                                <div class="flex justify-between">
+                                    <span>Amount:</span>
+                                    <span class="font-medium">R$ 45,60</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Date:</span>
+                                    <span>11/09/2025</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Linked:</span>
+                                    <span class="text-red-600"><i class="fas fa-unlink mr-1"></i>Unlinked</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receipt 6 -->
+                    <div class="receipt-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden cursor-pointer" onclick="openReceiptModal('receipt6')">
+                        <div class="receipt-preview flex items-center justify-center">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNlZmZkZmYiLz48dGV4dCB4PSI1MCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzA2NzU2ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SU5URVJORVQ8L3RleHQ+PC9zdmc+" 
+                                 alt="Receipt preview" class="w-full h-full object-cover rounded">
+                        </div>
+                        <div class="p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-gray-900 text-sm">Internet Bill</span>
+                                <span class="px-2 py-0.5 bg-teal-100 text-teal-700 rounded text-xs">📶</span>
+                            </div>
+                            <div class="text-xs text-gray-500 space-y-1">
+                                <div class="flex justify-between">
+                                    <span>Amount:</span>
+                                    <span class="font-medium">R$ 120,00</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Date:</span>
+                                    <span>10/09/2025</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Linked:</span>
+                                    <span class="text-blue-600"><i class="fas fa-link mr-1"></i>Expense #126</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receipt 7 -->
+                    <div class="receipt-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden cursor-pointer" onclick="openReceiptModal('receipt7')">
+                        <div class="receipt-preview flex items-center justify-center">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNmZmVkZjQiLz48dGV4dCB4PSI1MCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzM5MTgzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Q09GRkVFPC90ZXh0Pjwvc3ZnPg==" 
+                                 alt="Receipt preview" class="w-full h-full object-cover rounded">
+                        </div>
+                        <div class="p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-gray-900 text-sm">Coffee Shop</span>
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs">☕</span>
+                            </div>
+                            <div class="text-xs text-gray-500 space-y-1">
+                                <div class="flex justify-between">
+                                    <span>Amount:</span>
+                                    <span class="font-medium">R$ 28,50</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Date:</span>
+                                    <span>09/09/2025</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Linked:</span>
+                                    <span class="text-red-600"><i class="fas fa-unlink mr-1"></i>Unlinked</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receipt 8 -->
+                    <div class="receipt-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden cursor-pointer" onclick="openReceiptModal('receipt8')">
+                        <div class="receipt-preview flex items-center justify-center">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNmM2Y0ZjYiLz48dGV4dCB4PSI1MCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzM3NDE1MSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+TUFSS0VUPC90ZXh0Pjwvc3ZnPg==" 
+                                 alt="Receipt preview" class="w-full h-full object-cover rounded">
+                        </div>
+                        <div class="p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-gray-900 text-sm">Supermarket</span>
+                                <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">🛒</span>
+                            </div>
+                            <div class="text-xs text-gray-500 space-y-1">
+                                <div class="flex justify-between">
+                                    <span>Amount:</span>
+                                    <span class="font-medium">R$ 156,90</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Date:</span>
+                                    <span>08/09/2025</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Linked:</span>
+                                    <span class="text-blue-600"><i class="fas fa-link mr-1"></i>Expense #127</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 px-4 py-3">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm text-gray-600">
+                            Showing <span class="font-medium">1-8</span> of <span class="font-medium">24</span> receipts
+                        </p>
+                        <div class="flex items-center space-x-2">
+                            <button class="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50" disabled>
+                                <i class="fas fa-chevron-left mr-1"></i>Previous
+                            </button>
+                            <button class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm">1</button>
+                            <button class="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50">2</button>
+                            <button class="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50">3</button>
+                            <button class="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50">
+                                Next<i class="fas fa-chevron-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div class="grid grid-cols-5 py-2">
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-chart-line"></i>
+                <span class="text-xs mt-1">Dashboard</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-dollar-sign"></i>
+                <span class="text-xs mt-1">Expenses</span>
+            </button>
+            <button onclick="openUploadModal()" class="flex flex-col items-center py-2 text-gray-600">
+                <div class="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center">
+                    <i class="fas fa-plus text-xs"></i>
+                </div>
+                <span class="text-xs mt-1">Upload</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="text-xs mt-1">Lists</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-blue-600">
+                <i class="fas fa-receipt"></i>
+                <span class="text-xs mt-1">Receipts</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        function openUploadModal() {
+            alert('Open receipt upload modal or trigger file input');
+        }
+
+        function triggerFileInput() {
+            document.getElementById('receipt-upload').click();
+        }
+
+        function openReceiptModal(receiptId) {
+            alert(`Open full receipt viewer for: ${receiptId}`);
+        }
+
+        // Handle file upload
+        document.getElementById('receipt-upload').addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                alert(`${files.length} file(s) selected for upload`);
+                // Here you would handle the actual upload
+            }
+        });
+
+        // Drag and drop functionality
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                alert(`${files.length} file(s) dropped for upload`);
+                // Here you would handle the actual upload
+            }
+        });
+
+        // Filter functionality
+        const quickFilters = document.querySelectorAll('.quick-filter');
+        quickFilters.forEach(filter => {
+            filter.addEventListener('click', () => {
+                quickFilters.forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+                
+                const filterType = filter.dataset.filter;
+                console.log('Filtering receipts by:', filterType);
+                
+                // Here you would implement the actual filtering logic
+            });
+        });
+
+        // Receipt card hover animations are handled by CSS
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Receipt Gallery loaded');
+        });
+    </script>
+</body>
+</html>

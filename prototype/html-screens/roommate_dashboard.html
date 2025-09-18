@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomMate Manager - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Navigation -->
+    <nav class="bg-white shadow-sm border-b lg:hidden">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-home text-white text-sm"></i>
+                </div>
+                <h1 class="text-lg font-semibold text-gray-900">RoomMate</h1>
+            </div>
+            <button class="p-2">
+                <i class="fas fa-bars text-gray-600"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Desktop Sidebar -->
+        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:bg-white lg:border-r lg:border-gray-200">
+            <div class="flex-1 flex flex-col min-h-0">
+                <div class="flex items-center h-16 px-6 border-b border-gray-200">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-home text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-xl font-bold text-gray-900">RoomMate</h1>
+                    </div>
+                </div>
+                <nav class="flex-1 px-4 py-4 space-y-2">
+                    <a href="#" class="bg-blue-50 text-blue-700 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-chart-line w-5 mr-3 text-center"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-dollar-sign w-5 mr-3 text-center"></i>
+                        Expenses
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-shopping-cart w-5 mr-3 text-center"></i>
+                        Shopping Lists
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-receipt w-5 mr-3 text-center"></i>
+                        Receipts
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-chart-bar w-5 mr-3 text-center"></i>
+                        Reports
+                    </a>
+                </nav>
+                <div class="px-4 pb-4">
+                    <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                            <span class="text-white font-medium text-sm">JD</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">John Doe</p>
+                            <p class="text-xs text-gray-500 truncate">john@example.com</p>
+                        </div>
+                        <button class="p-1">
+                            <i class="fas fa-cog text-gray-400"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 lg:pl-64">
+            <div class="px-4 py-6 lg:px-8">
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+                    <p class="text-gray-600 mt-1">Overview of your shared expenses and activities</p>
+                </div>
+
+                <!-- Balance Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Your Balance</p>
+                                <p class="text-2xl font-bold text-red-600 mt-1">-R$ 245,50</p>
+                                <p class="text-sm text-gray-500 mt-1">You owe</p>
+                            </div>
+                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-arrow-down text-red-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Spent</p>
+                                <p class="text-2xl font-bold text-gray-900 mt-1">R$ 1.850,00</p>
+                                <p class="text-sm text-gray-500 mt-1">This month</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-credit-card text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Your Share</p>
+                                <p class="text-2xl font-bold text-gray-900 mt-1">R$ 925,00</p>
+                                <p class="text-sm text-gray-500 mt-1">50% of total</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-pie text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <button class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-2">
+                                <i class="fas fa-plus text-blue-600"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Add Expense</span>
+                        </button>
+                        
+                        <button class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-2">
+                                <i class="fas fa-upload text-green-600"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Upload Receipt</span>
+                        </button>
+                        
+                        <button class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-2">
+                                <i class="fas fa-list text-purple-600"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Shopping List</span>
+                        </button>
+                        
+                        <button class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-2">
+                                <i class="fas fa-handshake text-orange-600"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Settle Up</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity & Balance Details -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
+                            <button class="text-blue-600 text-sm font-medium hover:text-blue-700">View All</button>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-shopping-bag text-blue-600 text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900">Grocery Shopping</p>
+                                    <p class="text-sm text-gray-500">Added by Alex • R$ 127,80</p>
+                                    <p class="text-xs text-gray-400 mt-1">2 hours ago</p>
+                                </div>
+                                <span class="text-sm font-medium text-red-600">-R$ 63,90</span>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-bolt text-green-600 text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900">Electricity Bill</p>
+                                    <p class="text-sm text-gray-500">Added by You • R$ 180,00</p>
+                                    <p class="text-xs text-gray-400 mt-1">Yesterday</p>
+                                </div>
+                                <span class="text-sm font-medium text-green-600">+R$ 90,00</span>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-coffee text-orange-600 text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900">Coffee & Snacks</p>
+                                    <p class="text-sm text-gray-500">Added by Alex • R$ 45,20</p>
+                                    <p class="text-xs text-gray-400 mt-1">2 days ago</p>
+                                </div>
+                                <span class="text-sm font-medium text-red-600">-R$ 22,60</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Balance with Roommate -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Balance with Roommate</h2>
+                        
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-medium">A</span>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">Alex Silva</p>
+                                    <p class="text-sm text-gray-500">Your roommate</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-bold text-red-600">You owe R$ 245,50</p>
+                                <button class="text-blue-600 text-sm font-medium hover:text-blue-700 mt-1">
+                                    Settle up
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <h3 class="text-sm font-medium text-gray-700 mb-3">Expense Categories</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                        <span class="text-sm text-gray-600">Groceries</span>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-900">R$ 680,00</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                        <span class="text-sm text-gray-600">Utilities</span>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-900">R$ 420,00</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                        <span class="text-sm text-gray-600">Household</span>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-900">R$ 320,00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div class="grid grid-cols-5 py-2">
+            <button class="flex flex-col items-center py-2 text-blue-600">
+                <i class="fas fa-chart-line"></i>
+                <span class="text-xs mt-1">Dashboard</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-dollar-sign"></i>
+                <span class="text-xs mt-1">Expenses</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <div class="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center">
+                    <i class="fas fa-plus text-xs"></i>
+                </div>
+                <span class="text-xs mt-1">Add</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="text-xs mt-1">Lists</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-user"></i>
+                <span class="text-xs mt-1">Profile</span>
+            </button>
+        </div>
+    </nav>
+</body>
+</html>

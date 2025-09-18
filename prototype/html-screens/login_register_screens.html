@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomMate Manager - Login & Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md mx-auto px-4">
+        <!-- Logo Section -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <i class="fas fa-home text-white text-2xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900">RoomMate</h1>
+            <p class="text-gray-600 mt-1">Manage expenses with your roommate</p>
+        </div>
+
+        <!-- Auth Container -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200">
+                <button onclick="switchTab('login')" id="login-tab" class="flex-1 py-4 px-6 text-sm font-medium text-blue-600 border-b-2 border-blue-600 bg-blue-50">
+                    Sign In
+                </button>
+                <button onclick="switchTab('register')" id="register-tab" class="flex-1 py-4 px-6 text-sm font-medium text-gray-500 hover:text-gray-700">
+                    Sign Up
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-content" class="tab-content active p-6">
+                <form class="space-y-6">
+                    <div>
+                        <label for="login-email" class="block text-sm font-medium text-gray-700 mb-2">
+                            Email Address
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="email" 
+                                id="login-email" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-11"
+                                placeholder="john@example.com"
+                                required
+                            >
+                            <i class="fas fa-envelope absolute left-3 top-3.5 text-gray-400"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="login-password" class="block text-sm font-medium text-gray-700 mb-2">
+                            Password
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="login-password" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-11 pr-11"
+                                placeholder="••••••••"
+                                required
+                            >
+                            <i class="fas fa-lock absolute left-3 top-3.5 text-gray-400"></i>
+                            <button type="button" onclick="togglePassword('login-password')" class="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye" id="login-password-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input 
+                                id="remember-me" 
+                                type="checkbox" 
+                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                            >
+                            <label for="remember-me" class="ml-2 text-sm text-gray-600">
+                                Remember me
+                            </label>
+                        </div>
+                        <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                            Forgot password?
+                        </a>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-colors"
+                    >
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Sign In
+                    </button>
+                </form>
+
+                <!-- Social Login -->
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-white text-gray-500">Or continue with</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <button class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            <i class="fab fa-google text-red-500 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-700">Continue with Google</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-content" class="tab-content p-6">
+                <form class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="first-name" class="block text-sm font-medium text-gray-700 mb-2">
+                                First Name
+                            </label>
+                            <input 
+                                type="text" 
+                                id="first-name" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="John"
+                                required
+                            >
+                        </div>
+                        <div>
+                            <label for="last-name" class="block text-sm font-medium text-gray-700 mb-2">
+                                Last Name
+                            </label>
+                            <input 
+                                type="text" 
+                                id="last-name" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Doe"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="register-email" class="block text-sm font-medium text-gray-700 mb-2">
+                            Email Address
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="email" 
+                                id="register-email" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-11"
+                                placeholder="john@example.com"
+                                required
+                            >
+                            <i class="fas fa-envelope absolute left-3 top-3.5 text-gray-400"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="register-password" class="block text-sm font-medium text-gray-700 mb-2">
+                            Password
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="register-password" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-11 pr-11"
+                                placeholder="••••••••"
+                                required
+                            >
+                            <i class="fas fa-lock absolute left-3 top-3.5 text-gray-400"></i>
+                            <button type="button" onclick="togglePassword('register-password')" class="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye" id="register-password-icon"></i>
+                            </button>
+                        </div>
+                        <p class="mt-2 text-xs text-gray-500">Must be at least 8 characters long</p>
+                    </div>
+
+                    <div>
+                        <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-2">
+                            Confirm Password
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="confirm-password" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-11"
+                                placeholder="••••••••"
+                                required
+                            >
+                            <i class="fas fa-lock absolute left-3 top-3.5 text-gray-400"></i>
+                        </div>
+                    </div>
+
+                    <!-- Roommate Invitation -->
+                    <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-user-plus text-yellow-600 mt-0.5"></i>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-medium text-yellow-800">Invite Your Roommate</h4>
+                                <p class="text-xs text-yellow-600 mt-1 mb-3">Add your roommate's email to share expenses</p>
+                                <input 
+                                    type="email" 
+                                    placeholder="roommate@example.com"
+                                    class="w-full px-3 py-2 border border-yellow-300 rounded-lg text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-3">
+                        <input 
+                            id="terms" 
+                            type="checkbox" 
+                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 mt-0.5"
+                            required
+                        >
+                        <label for="terms" class="text-sm text-gray-600">
+                            I agree to the 
+                            <a href="#" class="text-blue-600 hover:text-blue-700 font-medium">Terms of Service</a> 
+                            and 
+                            <a href="#" class="text-blue-600 hover:text-blue-700 font-medium">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-colors"
+                    >
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Create Account
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8">
+            <p class="text-sm text-gray-500">
+                Made with <i class="fas fa-heart text-red-500"></i> for roommates who want to keep track of expenses
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active classes from tabs
+            document.querySelectorAll('[id$="-tab"]').forEach(tabButton => {
+                tabButton.classList.remove('text-blue-600', 'border-blue-600', 'bg-blue-50');
+                tabButton.classList.add('text-gray-500');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tab + '-content').classList.add('active');
+            
+            // Style active tab
+            const activeTab = document.getElementById(tab + '-tab');
+            activeTab.classList.remove('text-gray-500');
+            activeTab.classList.add('text-blue-600', 'border-blue-600', 'bg-blue-50');
+            
+            // Add border to active tab
+            activeTab.style.borderBottom = '2px solid #2563eb';
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(inputId + '-icon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Form validation feedback
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Show loading state
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading...';
+                    submitBtn.disabled = true;
+                    
+                    // Simulate API call
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        
+                        // For demo - show success message
+                        const isLogin = form.closest('#login-content');
+                        if (isLogin) {
+                            alert('Login successful! Redirecting to dashboard...');
+                        } else {
+                            alert('Account created successfully! Please check your email to verify.');
+                        }
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

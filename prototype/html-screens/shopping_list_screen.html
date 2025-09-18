@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomMate Manager - Shopping List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .shopping-item {
+            transition: all 0.2s ease;
+        }
+        .shopping-item:hover {
+            background-color: #f8fafc;
+        }
+        .shopping-item.completed {
+            opacity: 0.6;
+        }
+        .shopping-item.completed .item-text {
+            text-decoration: line-through;
+            color: #6b7280;
+        }
+        .quick-filter {
+            @apply px-4 py-2.5 text-sm font-medium rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 bg-white shadow-sm;
+        }
+        .quick-filter.active {
+            @apply bg-blue-600 text-white border-blue-600 shadow-md transform scale-105;
+        }
+        .add-item-form {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .add-item-form.active {
+            max-height: 200px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Header -->
+    <header class="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <h1 class="text-lg font-semibold text-gray-900">Shopping List</h1>
+            <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-1">
+                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span class="text-xs text-gray-600">Alex online</span>
+                </div>
+                <button onclick="toggleAddForm()" class="p-2 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-plus text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex">
+        <!-- Desktop Sidebar -->
+        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:bg-white lg:border-r lg:border-gray-200">
+            <div class="flex-1 flex flex-col min-h-0">
+                <div class="flex items-center h-16 px-6 border-b border-gray-200">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-home text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-xl font-bold text-gray-900">RoomMate</h1>
+                    </div>
+                </div>
+                <nav class="flex-1 px-4 py-4 space-y-2">
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-chart-line w-5 mr-3 text-center"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-dollar-sign w-5 mr-3 text-center"></i>
+                        Expenses
+                    </a>
+                    <a href="#" class="bg-blue-50 text-blue-700 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-shopping-cart w-5 mr-3 text-center"></i>
+                        Shopping Lists
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-receipt w-5 mr-3 text-center"></i>
+                        Receipts
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 lg:pl-64">
+            <div class="px-4 py-6 lg:px-8">
+                <!-- Header -->
+                <div class="mb-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Shopping List</h1>
+                            <div class="flex items-center space-x-4 mt-1">
+                                <p class="text-gray-600">Collaborative shopping with your roommate</p>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                    <span class="text-sm text-green-600 font-medium">Real-time sync</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 sm:mt-0 hidden lg:block">
+                            <button onclick="toggleAddForm()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                Add Item
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Add Item -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <div class="p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-plus text-blue-600 text-sm"></i>
+                            </div>
+                            <input 
+                                type="text" 
+                                id="quick-add-input"
+                                placeholder="Type item name and press Enter (e.g., Milk, Bananas, Bread...)"
+                                class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                onkeypress="handleQuickAdd(event)"
+                                autocomplete="off"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters & Stats -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                        <!-- Quick Filters -->
+                        <div>
+                            <div class="flex flex-wrap gap-3">
+                                <button class="quick-filter active" data-filter="all">
+                                    <i class="fas fa-list mr-2"></i>All (12)
+                                </button>
+                                <button class="quick-filter" data-filter="pending">
+                                    <i class="fas fa-clock mr-2"></i>Pending (8)
+                                </button>
+                                <button class="quick-filter" data-filter="completed">
+                                    <i class="fas fa-check mr-2"></i>Done (4)
+                                </button>
+                                <button onclick="clearCompleted()" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-200 rounded-lg hover:bg-gray-50">
+                                    <i class="fas fa-trash mr-1"></i>Clear Done
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shopping List -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <!-- List Header -->
+                    <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h2 class="font-semibold text-gray-900">Items to Buy</h2>
+                            <div class="flex items-center space-x-4">
+                                <button class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                    <i class="fas fa-sort mr-1"></i>Sort
+                                </button>
+                                <button onclick="clearCompleted()" class="text-sm text-gray-600 hover:text-gray-700">
+                                    <i class="fas fa-trash mr-1"></i>Clear Completed
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shopping Items -->
+                    <div class="divide-y divide-gray-100">
+                        <!-- Item 1 -->
+                        <div class="shopping-item px-4 py-3 flex items-center space-x-3 hover:bg-gray-50">
+                            <button onclick="toggleItem(this)" class="w-4 h-4 border-2 border-gray-300 rounded hover:border-blue-500 transition-colors flex items-center justify-center flex-shrink-0"></button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-medium text-gray-900 item-text text-sm">Organic Bananas</span>
+                                    <span class="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs">🥬</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500">You</div>
+                            <button class="text-gray-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Item 2 -->
+                        <div class="shopping-item px-4 py-3 flex items-center space-x-3 hover:bg-gray-50">
+                            <button onclick="toggleItem(this)" class="w-4 h-4 border-2 border-gray-300 rounded hover:border-blue-500 transition-colors flex items-center justify-center flex-shrink-0"></button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-medium text-gray-900 item-text text-sm">Whole Milk - 1L</span>
+                                    <span class="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">🥛</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500">Alex</div>
+                            <button class="text-gray-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Item 3 -->
+                        <div class="shopping-item px-4 py-3 flex items-center space-x-3 hover:bg-gray-50">
+                            <button onclick="toggleItem(this)" class="w-4 h-4 border-2 border-gray-300 rounded hover:border-blue-500 transition-colors flex items-center justify-center flex-shrink-0"></button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-medium text-gray-900 item-text text-sm">Dishwashing Liquid</span>
+                                    <span class="px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded text-xs">🧽</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500">You</div>
+                            <button class="text-gray-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Item 4 - Completed -->
+                        <div class="shopping-item completed px-4 py-3 flex items-center space-x-3 hover:bg-gray-50">
+                            <button onclick="toggleItem(this)" class="w-4 h-4 bg-green-600 border-2 border-green-600 rounded flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-check text-white text-xs"></i>
+                            </button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-medium text-gray-900 item-text text-sm">Chicken Breast - 1kg</span>
+                                    <span class="px-1.5 py-0.5 bg-red-100 text-red-700 rounded text-xs">🥩</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-green-600"><i class="fas fa-check mr-1"></i>Alex</div>
+                            <button class="text-gray-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Item 5 -->
+                        <div class="shopping-item px-4 py-3 flex items-center space-x-3 hover:bg-gray-50">
+                            <button onclick="toggleItem(this)" class="w-4 h-4 border-2 border-gray-300 rounded hover:border-blue-500 transition-colors flex items-center justify-center flex-shrink-0"></button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-medium text-gray-900 item-text text-sm">Greek Yogurt - 500g</span>
+                                    <span class="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">🥛</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500">Alex</div>
+                            <button class="text-gray-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Item 6 - Completed -->
+                        <div class="shopping-item completed px-4 py-3 flex items-center space-x-3 hover:bg-gray-50">
+                            <button onclick="toggleItem(this)" class="w-4 h-4 bg-green-600 border-2 border-green-600 rounded flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-check text-white text-xs"></i>
+                            </button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-medium text-gray-900 item-text text-sm">Toilet Paper - 12 rolls</span>
+                                    <span class="px-1.5 py-0.5 bg-pink-100 text-pink-700 rounded text-xs">🧴</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-green-600"><i class="fas fa-check mr-1"></i>You</div>
+                            <button class="text-gray-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Item 7 -->
+                        <div class="shopping-item px-4 py-3 flex items-center space-x-3 hover:bg-gray-50">
+                            <button onclick="toggleItem(this)" class="w-4 h-4 border-2 border-gray-300 rounded hover:border-blue-500 transition-colors flex items-center justify-center flex-shrink-0"></button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-medium text-gray-900 item-text text-sm">White Bread</span>
+                                    <span class="px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded text-xs">🥫</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500">You</div>
+                            <button class="text-gray-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Item 8 -->
+                        <div class="shopping-item px-4 py-3 flex items-center space-x-3 hover:bg-gray-50">
+                            <button onclick="toggleItem(this)" class="w-4 h-4 border-2 border-gray-300 rounded hover:border-blue-500 transition-colors flex items-center justify-center flex-shrink-0"></button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-medium text-gray-900 item-text text-sm">Olive Oil - 500ml</span>
+                                    <span class="px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded text-xs">🥫</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500">Alex</div>
+                            <button class="text-gray-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Item 9 -->
+                        <div class="shopping-item px-4 py-3 flex items-center space-x-3 hover:bg-gray-50">
+                            <button onclick="toggleItem(this)" class="w-4 h-4 border-2 border-gray-300 rounded hover:border-blue-500 transition-colors flex items-center justify-center flex-shrink-0"></button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-medium text-gray-900 item-text text-sm">Tomatoes - 1kg</span>
+                                    <span class="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs">🥬</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500">You</div>
+                            <button class="text-gray-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Item 10 -->
+                        <div class="shopping-item px-4 py-3 flex items-center space-x-3 hover:bg-gray-50">
+                            <button onclick="toggleItem(this)" class="w-4 h-4 border-2 border-gray-300 rounded hover:border-blue-500 transition-colors flex items-center justify-center flex-shrink-0"></button>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-medium text-gray-900 item-text text-sm">All-Purpose Flour</span>
+                                    <span class="px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded text-xs">🥫</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500">Alex</div>
+                            <button class="text-gray-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div class="grid grid-cols-5 py-2">
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-chart-line"></i>
+                <span class="text-xs mt-1">Dashboard</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-dollar-sign"></i>
+                <span class="text-xs mt-1">Expenses</span>
+            </button>
+            <button onclick="focusInput()" class="flex flex-col items-center py-2 text-gray-600">
+                <div class="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center">
+                    <i class="fas fa-plus text-xs"></i>
+                </div>
+                <span class="text-xs mt-1">Add</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-blue-600">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="text-xs mt-1">Lists</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-user"></i>
+                <span class="text-xs mt-1">Profile</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        function handleQuickAdd(event) {
+            if (event.key === 'Enter') {
+                const input = document.getElementById('quick-add-input');
+                const itemName = input.value.trim();
+                
+                if (!itemName) return;
+                
+                // Add item to list
+                addItemToList(itemName);
+                
+                // Clear input and keep focus for next item
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function addItemToList(name) {
+            const itemsContainer = document.querySelector('.divide-y');
+            
+            // Detect category based on item name (simple heuristic)
+            let categoryEmoji = '📦';
+            let categoryClass = 'bg-gray-100 text-gray-700';
+            
+            const lowerName = name.toLowerCase();
+            if (lowerName.includes('milk') || lowerName.includes('yogurt') || lowerName.includes('cheese') || lowerName.includes('butter')) {
+                categoryEmoji = '🥛';
+                categoryClass = 'bg-blue-100 text-blue-700';
+            } else if (lowerName.includes('banana') || lowerName.includes('apple') || lowerName.includes('tomato') || lowerName.includes('lettuce') || lowerName.includes('carrot')) {
+                categoryEmoji = '🥬';
+                categoryClass = 'bg-green-100 text-green-700';
+            } else if (lowerName.includes('chicken') || lowerName.includes('meat') || lowerName.includes('fish') || lowerName.includes('beef')) {
+                categoryEmoji = '🥩';
+                categoryClass = 'bg-red-100 text-red-700';
+            } else if (lowerName.includes('bread') || lowerName.includes('rice') || lowerName.includes('pasta') || lowerName.includes('flour') || lowerName.includes('oil')) {
+                categoryEmoji = '🥫';
+                categoryClass = 'bg-yellow-100 text-yellow-700';
+            } else if (lowerName.includes('soap') || lowerName.includes('detergent') || lowerName.includes('shampoo') || lowerName.includes('toothpaste') || lowerName.includes('paper')) {
+                categoryEmoji = '🧽';
+                categoryClass = 'bg-purple-100 text-purple-700';
+            }
+            
+            // Create new item element
+            const newItem = document.createElement('div');
+            newItem.className = 'shopping-item px-4 py-3 flex items-center space-x-3 hover:bg-gray-50';
+            newItem.innerHTML = `
+                <button onclick="toggleItem(this)" class="w-4 h-4 border-2 border-gray-300 rounded hover:border-blue-500 transition-colors flex items-center justify-center flex-shrink-0"></button>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center space-x-2">
+                        <span class="font-medium text-gray-900 item-text text-sm">${name}</span>
+                        <span class="px-1.5 py-0.5 ${categoryClass} rounded text-xs">${categoryEmoji}</span>
+                    </div>
+                </div>
+                <div class="text-xs text-gray-500">You</div>
+                <button class="text-gray-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete" onclick="removeItem(this)">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            `;
+            
+            // Add to top of list (before any completed items)
+            const firstCompleted = itemsContainer.querySelector('.completed');
+            if (firstCompleted) {
+                itemsContainer.insertBefore(newItem, firstCompleted);
+            } else {
+                itemsContainer.appendChild(newItem);
+            }
+            
+            // Animate in
+            newItem.style.opacity = '0';
+            newItem.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                newItem.style.transition = 'all 0.3s ease';
+                newItem.style.opacity = '1';
+                newItem.style.transform = 'translateY(0)';
+            }, 10);
+        }
+
+        function focusInput() {
+            document.getElementById('quick-add-input').focus();
+        }
+
+        function toggleItem(button) {
+            const itemRow = button.closest('.shopping-item');
+            const isCompleted = itemRow.classList.contains('completed');
+            
+            if (isCompleted) {
+                // Mark as pending
+                itemRow.classList.remove('completed');
+                button.innerHTML = '';
+                button.className = 'w-4 h-4 border-2 border-gray-300 rounded hover:border-blue-500 transition-colors flex items-center justify-center flex-shrink-0';
+                
+                // Update who column
+                const whoColumn = itemRow.querySelector('.text-xs.text-green-600') || itemRow.querySelector('.text-xs:not([class*="bg-"])');
+                if (whoColumn && !whoColumn.classList.contains('bg-')) {
+                    whoColumn.className = 'text-xs text-gray-500';
+                    whoColumn.innerHTML = 'You';
+                }
+            } else {
+                // Mark as completed
+                itemRow.classList.add('completed');
+                button.innerHTML = '<i class="fas fa-check text-white text-xs"></i>';
+                button.className = 'w-4 h-4 bg-green-600 border-2 border-green-600 rounded flex items-center justify-center flex-shrink-0';
+                
+                // Update who column
+                const whoColumn = itemRow.querySelector('.text-xs:not([class*="bg-"])');
+                if (whoColumn && !whoColumn.classList.contains('bg-')) {
+                    whoColumn.className = 'text-xs text-green-600';
+                    whoColumn.innerHTML = '<i class="fas fa-check mr-1"></i>You';
+                }
+            }
+        }
+
+        function removeItem(button) {
+            const itemRow = button.closest('.shopping-item');
+            itemRow.style.transition = 'all 0.3s ease';
+            itemRow.style.opacity = '0';
+            itemRow.style.transform = 'translateX(-100%)';
+            setTimeout(() => {
+                itemRow.remove();
+            }, 300);
+        }
+
+        function clearCompleted() {
+            if (confirm('Remove all completed items?')) {
+                const completedItems = document.querySelectorAll('.shopping-item.completed');
+                completedItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.style.transition = 'all 0.3s ease';
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateX(-100%)';
+                        setTimeout(() => {
+                            item.remove();
+                        }, 300);
+                    }, index * 100);
+                });
+            }
+        }
+
+        // Quick filters functionality
+        const quickFilters = document.querySelectorAll('.quick-filter');
+        quickFilters.forEach(filter => {
+            filter.addEventListener('click', () => {
+                quickFilters.forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+                
+                const filterType = filter.dataset.filter;
+                const items = document.querySelectorAll('.shopping-item');
+                
+                items.forEach(item => {
+                    switch(filterType) {
+                        case 'all':
+                            item.style.display = '';
+                            break;
+                        case 'pending':
+                            item.style.display = item.classList.contains('completed') ? 'none' : '';
+                            break;
+                        case 'completed':
+                            item.style.display = item.classList.contains('completed') ? '' : 'none';
+                            break;
+                    }
+                });
+            });
+        });
+
+        // Auto-focus input on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('quick-add-input').focus();
+        });
+    </script>
+</body>
+</html>

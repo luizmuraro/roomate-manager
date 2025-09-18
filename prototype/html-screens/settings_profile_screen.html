@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomMate Manager - Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .setting-item {
+            transition: all 0.2s ease;
+        }
+        .setting-item:hover {
+            background-color: #f8fafc;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #3b82f6;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Header -->
+    <header class="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <h1 class="text-lg font-semibold text-gray-900">Settings</h1>
+            <button onclick="saveSettings()" class="text-blue-600 font-medium text-sm">
+                Save
+            </button>
+        </div>
+    </header>
+
+    <div class="flex">
+        <!-- Desktop Sidebar -->
+        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:bg-white lg:border-r lg:border-gray-200">
+            <div class="flex-1 flex flex-col min-h-0">
+                <div class="flex items-center h-16 px-6 border-b border-gray-200">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-home text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-xl font-bold text-gray-900">RoomMate</h1>
+                    </div>
+                </div>
+                <nav class="flex-1 px-4 py-4 space-y-2">
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-chart-line w-5 mr-3 text-center"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-dollar-sign w-5 mr-3 text-center"></i>
+                        Expenses
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-shopping-cart w-5 mr-3 text-center"></i>
+                        Shopping Lists
+                    </a>
+                    <a href="#" class="text-gray-600 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-receipt w-5 mr-3 text-center"></i>
+                        Receipts
+                    </a>
+                    <a href="#" class="bg-blue-50 text-blue-700 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-cog w-5 mr-3 text-center"></i>
+                        Settings
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 lg:pl-64">
+            <div class="px-4 py-6 lg:px-8">
+                <!-- Header -->
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
+                    <p class="text-gray-600 mt-1">Manage your account and app preferences</p>
+                </div>
+
+                <!-- Profile Section -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Profile</h2>
+                        <p class="text-sm text-gray-600 mt-1">Update your personal information</p>
+                    </div>
+                    <div class="p-6">
+                        <!-- Profile Picture -->
+                        <div class="flex items-center space-x-6 mb-6">
+                            <div class="relative">
+                                <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold text-2xl">JD</span>
+                                </div>
+                                <button class="absolute -bottom-1 -right-1 w-7 h-7 bg-white border-2 border-gray-200 rounded-full flex items-center justify-center hover:bg-gray-50">
+                                    <i class="fas fa-camera text-gray-600 text-xs"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-900">Profile Photo</h3>
+                                <p class="text-sm text-gray-600 mt-1">Update your profile picture</p>
+                                <button class="mt-2 px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                                    Change Photo
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Profile Form -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                                <input type="text" value="John" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                                <input type="text" value="Doe" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" value="john@example.com" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Phone (optional)</label>
+                                <input type="tel" placeholder="+55 (11) 99999-9999" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                        
+                        <!-- Save Profile -->
+                        <div class="flex justify-end">
+                            <button onclick="saveProfile()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-save mr-2"></i>Save Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roommate Management -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Roommate</h2>
+                        <p class="text-sm text-gray-600 mt-1">Manage your roommate connection</p>
+                    </div>
+                    <div class="p-6">
+                        <!-- Current Roommate -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-medium">A</span>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">Alex Silva</p>
+                                    <p class="text-sm text-gray-500">alex@example.com</p>
+                                    <p class="text-xs text-green-600"><i class="fas fa-circle mr-1"></i>Connected since Sep 2025</p>
+                                </div>
+                            </div>
+                            <button onclick="manageRoommate()" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                                Manage
+                            </button>
+                        </div>
+
+                        <!-- Invite New Roommate -->
+                        <div class="border-2 border-dashed border-gray-200 rounded-lg p-4">
+                            <div class="text-center">
+                                <i class="fas fa-user-plus text-gray-400 text-2xl mb-2"></i>
+                                <p class="text-gray-600 mb-2">Need to add another roommate?</p>
+                                <button onclick="inviteRoommate()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+                                    <i class="fas fa-plus mr-2"></i>Invite Roommate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Notifications</h2>
+                        <p class="text-sm text-gray-600 mt-1">Control how you receive notifications</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4 mb-6">
+                            <!-- Email Notifications -->
+                            <div class="setting-item flex items-center justify-between py-3">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">Email Notifications</h4>
+                                    <p class="text-sm text-gray-600">Receive updates via email</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <!-- New Expenses -->
+                            <div class="setting-item flex items-center justify-between py-3">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">New Expenses</h4>
+                                    <p class="text-sm text-gray-600">When roommate adds new expenses</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <!-- Settlement Reminders -->
+                            <div class="setting-item flex items-center justify-between py-3">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">Settlement Reminders</h4>
+                                    <p class="text-sm text-gray-600">Weekly balance reminders</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <!-- Shopping List Updates -->
+                            <div class="setting-item flex items-center justify-between py-3">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">Shopping List Updates</h4>
+                                    <p class="text-sm text-gray-600">When items are added or completed</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Save Notifications -->
+                        <div class="flex justify-end">
+                            <button onclick="saveNotifications()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-save mr-2"></i>Save Notifications
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- App Preferences -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">App Preferences</h2>
+                        <p class="text-sm text-gray-600 mt-1">Customize your app experience</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4 mb-6">
+                            <!-- Currency -->
+                            <div class="setting-item py-3">
+                                <label class="block font-medium text-gray-900 mb-2">Currency</label>
+                                <select class="w-full md:w-48 px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="BRL" selected>Brazilian Real (R$)</option>
+                                    <option value="USD">US Dollar ($)</option>
+                                    <option value="EUR">Euro (€)</option>
+                                    <option value="GBP">British Pound (£)</option>
+                                </select>
+                            </div>
+
+                            <!-- Language -->
+                            <div class="setting-item py-3">
+                                <label class="block font-medium text-gray-900 mb-2">Language</label>
+                                <select class="w-full md:w-48 px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="pt-BR" selected>Português (Brasil)</option>
+                                    <option value="en-US">English (US)</option>
+                                    <option value="es-ES">Español</option>
+                                </select>
+                            </div>
+
+                            <!-- Default Split Method -->
+                            <div class="setting-item py-3">
+                                <label class="block font-medium text-gray-900 mb-2">Default Split Method</label>
+                                <select class="w-full md:w-48 px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="equal" selected>Split Equally</option>
+                                    <option value="custom">Custom Amount</option>
+                                    <option value="percentage">By Percentage</option>
+                                </select>
+                            </div>
+
+                            <!-- Auto-categorization -->
+                            <div class="setting-item flex items-center justify-between py-3">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">Auto-categorization</h4>
+                                    <p class="text-sm text-gray-600">Automatically suggest categories for expenses</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Save App Preferences -->
+                        <div class="flex justify-end">
+                            <button onclick="savePreferences()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-save mr-2"></i>Save Preferences
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Privacy & Security -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Privacy & Security</h2>
+                        <p class="text-sm text-gray-600 mt-1">Manage your privacy and security settings</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4 mb-6">
+                            <!-- Change Password -->
+                            <div class="setting-item flex items-center justify-between py-3">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">Password</h4>
+                                    <p class="text-sm text-gray-600">Last changed 3 months ago</p>
+                                </div>
+                                <button onclick="changePassword()" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                                    Change
+                                </button>
+                            </div>
+
+                            <!-- Data Export -->
+                            <div class="setting-item flex items-center justify-between py-3">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">Export Data</h4>
+                                    <p class="text-sm text-gray-600">Download your expense data</p>
+                                </div>
+                                <button onclick="exportData()" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Save Security -->
+                        <div class="flex justify-end">
+                            <button onclick="saveSecurity()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-save mr-2"></i>Save Security
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="bg-white rounded-lg shadow-sm border border-red-200 mb-6">
+                    <div class="p-6 border-b border-red-200">
+                        <h2 class="text-lg font-semibold text-red-900">Danger Zone</h2>
+                        <p class="text-sm text-red-600 mt-1">Irreversible and destructive actions</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <!-- Disconnect Roommate -->
+                            <div class="setting-item flex items-center justify-between py-3">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">Disconnect Roommate</h4>
+                                    <p class="text-sm text-gray-600">Remove roommate connection and settle all balances</p>
+                                </div>
+                                <button onclick="disconnectRoommate()" class="px-3 py-1.5 border border-orange-600 text-orange-600 rounded-lg text-sm hover:bg-orange-50">
+                                    Disconnect
+                                </button>
+                            </div>
+
+                            <!-- Delete Account -->
+                            <div class="setting-item flex items-center justify-between py-3">
+                                <div>
+                                    <h4 class="font-medium text-red-900">Delete Account</h4>
+                                    <p class="text-sm text-red-600">Permanently delete your account and all data</p>
+                                </div>
+                                <button onclick="deleteAccount()" class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">
+                                    Delete Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save/Logout Actions -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <button onclick="saveSettings()" class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-save mr-2"></i>Save Changes
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="logout()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div class="grid grid-cols-5 py-2">
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-chart-line"></i>
+                <span class="text-xs mt-1">Dashboard</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-dollar-sign"></i>
+                <span class="text-xs mt-1">Expenses</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <div class="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center">
+                    <i class="fas fa-plus text-xs"></i>
+                </div>
+                <span class="text-xs mt-1">Add</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-gray-600">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="text-xs mt-1">Lists</span>
+            </button>
+            <button class="flex flex-col items-center py-2 text-blue-600">
+                <i class="fas fa-cog"></i>
+                <span class="text-xs mt-1">Settings</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        function saveProfile() {
+            // Save profile information
+            alert('Profile saved successfully!');
+        }
+
+        function saveNotifications() {
+            // Save notification preferences
+            alert('Notification settings saved successfully!');
+        }
+
+        function savePreferences() {
+            // Save app preferences
+            alert('App preferences saved successfully!');
+        }
+
+        function saveSecurity() {
+            // Save security settings
+            alert('Security settings saved successfully!');
+        }
+
+        function saveSettings() {
+            // Save all settings at once
+            alert('All settings saved successfully!');
+        }
+
+        function changePassword() {
+            alert('Change password modal would open');
+        }
+
+        function exportData() {
+            alert('Data export would begin - CSV/JSON download');
+        }
+
+        function manageRoommate() {
+            alert('Manage roommate options: rename, change permissions, remove');
+        }
+
+        function inviteRoommate() {
+            alert('Invite roommate modal would open');
+        }
+
+        function disconnectRoommate() {
+            if (confirm('Are you sure you want to disconnect from your roommate? This will settle all balances and cannot be undone.')) {
+                alert('Roommate disconnected and balances settled');
+            }
+        }
+
+        function deleteAccount() {
+            const confirmation = prompt('Type "DELETE" to confirm account deletion:');
+            if (confirmation === 'DELETE') {
+                alert('Account deletion process would start');
+            }
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                alert('Logged out successfully');
+            }
+        }
+
+        // Auto-save form changes
+        document.querySelectorAll('input, select').forEach(input => {
+            input.addEventListener('change', () => {
+                // Auto-save functionality would be implemented here
+                console.log('Form changed, auto-saving...');
+            });
+        });
+
+        // Toggle switches functionality
+        document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+            toggle.addEventListener('change', () => {
+                console.log('Toggle changed:', toggle.checked);
+            });
+        });
+    </script>
+</body>
+</html>
