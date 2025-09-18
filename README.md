@@ -102,25 +102,55 @@ Visit our [live demo](https://your-username.github.io/roommate-manager) to see t
    # Check user-guide.md for usage instructions
    ```
 
-## 📱 Screenshots
+## 📱 MVP Screenshots
 
-| Screen | Description |
-|--------|-------------|
-| ![Sign In](docs/screenshots/sign-in.jpeg) | Authentication – Sign In |
-| ![Sign Up](docs/screenshots/sign-up.jpeg) | Authentication – Sign Up |
-| ![Dashboard](docs/screenshots/dashboard.jpeg) | Roommate Expense Overview |
-| ![Add Expense - Step 1](docs/screenshots/add-expense-modal-pt-1.jpeg) | Smart Expense Addition (Step 1) |
-| ![Add Expense - Step 2](docs/screenshots/add-expense-modal-pt-2.jpeg) | Smart Expense Addition (Step 2) |
-| ![Expenses List](docs/screenshots/expenses-list.jpeg) | Comprehensive Expense Management |
-| ![Shopping List](docs/screenshots/shopping-list.jpeg) | Collaborative Shopping |
-| ![Receipt Gallery - Part 1](docs/screenshots/receipt-gallery-pt-1.jpeg) | Digital Receipt Management (Part 1) |
-| ![Receipt Gallery - Part 2](docs/screenshots/receipt-gallery-pt-2.jpeg) | Digital Receipt Management (Part 2) |
-| ![Settings - Profile](docs/screenshots/settings-profile.jpeg) | Settings – Profile |
-| ![Settings - Roommate](docs/screenshots/settings-roomate.jpeg) | Settings – Roommate |
-| ![Settings - Privacy](docs/screenshots/settings-privacy.jpeg) | Settings – Privacy |
-| ![Settings - Notifications](docs/screenshots/settings-notification.jpeg) | Settings – Notifications |
+### 🔑 Authentication
+| Login | Sign Up |
+|-------|---------|
+| <img src="docs/screenshots/sign-in.jpeg" width="400"/> | <img src="docs/screenshots/sign-up.jpeg" width="400"/> |
 
-*Screenshots will be added to complete the documentation.*
+---
+
+### 🏠 Dashboard
+| Overview |
+|----------|
+| <img src="docs/screenshots/dashboard.jpeg" width="700"/> |
+
+---
+
+### ➕ Add Expense
+| Modal Step 1 | Modal Step 2 |
+|--------------|--------------|
+| <img src="docs/screenshots/add-expense-modal-pt-1.jpeg" width="400"/> | <img src="docs/screenshots/add-expense-modal-pt-2.jpeg" width="400"/> |
+
+---
+
+### 📋 Expenses List
+| All Expenses |
+|--------------|
+| <img src="docs/screenshots/expenses-list.jpeg" width="700"/> |
+
+---
+
+### 🛒 Shopping List
+| Collaborative Shopping |
+|------------------------|
+| <img src="docs/screenshots/shopping-list.jpeg" width="700"/> |
+
+---
+
+### 🧾 Receipt Gallery
+| Receipt 1 | Receipt 2 |
+|-----------|-----------|
+| <img src="docs/screenshots/receipt-gallery-pt-1.jpeg" width="400"/> | <img src="docs/screenshots/receipt-gallery-pt-2.jpeg" width="400"/> |
+
+---
+
+### ⚙️ Settings
+| Profile | Roommate | Privacy | Notifications |
+|---------|----------|---------|---------------|
+| <img src="docs/screenshots/settings-profile.jpeg" width="250"/> | <img src="docs/screenshots/settings-roomate.jpeg" width="250"/> | <img src="docs/screenshots/settings-privacy.jpeg" width="250"/> | <img src="docs/screenshots/settings-notification.jpeg" width="250"/> |
+
 
 ## 🌍 Localization
 
