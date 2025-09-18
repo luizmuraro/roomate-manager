@@ -195,7 +195,6 @@ config/local.php
 
 # Temporary test files
 test-results/
-screenshots/
 videos/
 
 # Mobile development
