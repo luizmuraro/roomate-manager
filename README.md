@@ -102,19 +102,55 @@ Visit our [live demo](https://your-username.github.io/roommate-manager) to see t
    # Check user-guide.md for usage instructions
    ```
 
-## 📱 Screenshots
+## 📱 MVP Screenshots
 
-| Screen | Description |
-|--------|-------------|
-| ![Login](docs/screenshots/login.png) | Authentication & Registration |
-| ![Dashboard](docs/screenshots/dashboard.png) | Roommate Expense Overview |
-| ![Add Expense](docs/screenshots/add-expense.png) | Smart Expense Addition |
-| ![Expenses List](docs/screenshots/expenses-list.png) | Comprehensive Expense Management |
-| ![Shopping List](docs/screenshots/shopping-list.png) | Collaborative Shopping |
-| ![Receipt Gallery](docs/screenshots/receipt-gallery.png) | Digital Receipt Management |
-| ![Settings](docs/screenshots/settings.png) | Profile & Configuration |
+### 🔑 Authentication
+| Login | Sign Up |
+|-------|---------|
+| <img src="docs/screenshots/sign-in.jpeg" width="400"/> | <img src="docs/screenshots/sign-up.jpeg" width="400"/> |
 
-*Screenshots will be added to complete the documentation.*
+---
+
+### 🏠 Dashboard
+| Overview |
+|----------|
+| <img src="docs/screenshots/dashboard.jpeg" width="700"/> |
+
+---
+
+### ➕ Add Expense
+| Modal Step 1 | Modal Step 2 |
+|--------------|--------------|
+| <img src="docs/screenshots/add-expense-modal-pt-1.jpeg" width="400"/> | <img src="docs/screenshots/add-expense-modal-pt-2.jpeg" width="400"/> |
+
+---
+
+### 📋 Expenses List
+| All Expenses |
+|--------------|
+| <img src="docs/screenshots/expenses-list.jpeg" width="700"/> |
+
+---
+
+### 🛒 Shopping List
+| Collaborative Shopping |
+|------------------------|
+| <img src="docs/screenshots/shopping-list.jpeg" width="700"/> |
+
+---
+
+### 🧾 Receipt Gallery
+| Receipt 1 | Receipt 2 |
+|-----------|-----------|
+| <img src="docs/screenshots/receipt-gallery-pt-1.jpeg" width="400"/> | <img src="docs/screenshots/receipt-gallery-pt-2.jpeg" width="400"/> |
+
+---
+
+### ⚙️ Settings
+| Profile | Roommate | Privacy | Notifications |
+|---------|----------|---------|---------------|
+| <img src="docs/screenshots/settings-profile.jpeg" width="250"/> | <img src="docs/screenshots/settings-roomate.jpeg" width="250"/> | <img src="docs/screenshots/settings-privacy.jpeg" width="250"/> | <img src="docs/screenshots/settings-notification.jpeg" width="250"/> |
+
 
 ## 🌍 Localization
 
