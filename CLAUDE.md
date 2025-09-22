@@ -86,7 +86,7 @@ rails generate model User # Generate models, controllers, etc.
 - **Real-time:** Action Cable (WebSockets) for shopping lists
 - **Background Jobs:** Sidekiq + Redis for async processing
 - **API:** RESTful JSON API with Active Model Serializers
-- **Deployment:** Vercel (frontend) + Heroku/Railway (backend)
+- **Deployment:** Vercel (frontend) + Railway/Render (backend) - Free tier
 
 ### Core Features
 1. **Expense Management** - Add, split, and track shared expenses with smart categorization
@@ -382,13 +382,52 @@ Authentication → Dashboard (main hub)
 - GitHub Pages deployment for live demo
 - Static file serving from `prototype/html-screens/`
 
-### Future Production
-- **Frontend:** Vercel deployment with automatic deployments on push
-- **Backend:** Heroku/Railway + AWS/DigitalOcean for API hosting
-- **Database:** PostgreSQL for production, SQLite for development
-- **File Storage:** AWS S3 + Active Storage for receipts and profile images
-- **Background Processing:** Redis + Sidekiq for async jobs
-- **Monitoring:** Rails built-in logging + external monitoring tools
+### Production Deployment (Free Tier Strategy)
+- **Frontend:** Vercel (Free tier - perfect for React apps)
+- **Backend:** Railway (Free tier - $5/month after trial) or Render (Free tier)
+- **Database:** PostgreSQL (Railway/Render free tier included)
+- **File Storage:** Cloudinary (Free tier - 25GB bandwidth) for receipts/images
+- **Background Jobs:** Built-in Rails jobs (vs paid Redis)
+- **Real-time:** Action Cable with Redis (Railway free tier)
+- **Monitoring:** Railway/Render built-in monitoring
+- **Domain:** Custom domain via Vercel (free with domain purchase)
+
+**Total Cost: $0-5/month** for a fully functional production app
+
+### Free Tier Resources Breakdown
+
+**🆓 Completely Free (Forever):**
+- **Vercel** - Frontend hosting, unlimited personal projects
+- **GitHub** - Repository hosting, Actions (2000 minutes/month)
+- **Google OAuth** - Authentication service
+- **Cloudinary** - Image storage (25GB bandwidth/month)
+
+**💰 Minimal Cost Options:**
+- **Railway** - $5/month after 500 hours free trial (includes DB + Redis)
+- **Render** - Free tier with limitations, $7/month for production
+- **PlanetScale** - Free MySQL tier (1 database, 1GB storage)
+- **Redis Cloud** - 30MB free tier
+
+**🎯 Recommended Stack for Real Usage:**
+```
+Frontend: Vercel (Free)
+Backend: Railway ($5/month)
+Database: PostgreSQL (included with Railway)
+Storage: Cloudinary (Free tier)
+Auth: Google OAuth (Free)
+Monitoring: Railway built-in (Free)
+
+Total: $5/month for production-ready app
+```
+
+**📱 Real-World Usage Considerations:**
+- Supports 2-4 active users easily on free tiers
+- Handle hundreds of expenses/month
+- Real-time shopping lists work smoothly
+- Professional custom domain possible
+- Automatic deployments on git push
+- SSL certificates included
+- Database backups included
 
 ## Important Development Notes
 
