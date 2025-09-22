@@ -71,12 +71,13 @@ Browser Support: Modern browsers (Chrome, Firefox, Safari)
 
 ### Planned Production Stack
 ```
-Frontend: React + TypeScript + Tailwind CSS
-Backend: PHP Laravel (RESTful API)
-Database: MySQL/PostgreSQL
-Authentication: Google OAuth + JWT
-Real-time: WebSocket for shopping lists
-Deployment: Vercel (frontend) + Railway (backend)
+Frontend: React + TypeScript + Tailwind CSS + shadcn/ui
+Backend: Ruby on Rails 7+ (RESTful API)
+Database: PostgreSQL/MySQL
+Authentication: Google OAuth + Devise + JWT
+Real-time: Action Cable (WebSockets) for shopping lists
+Background Jobs: Sidekiq + Redis
+Deployment: Vercel (frontend) + Heroku/Railway (backend)
 ```
 
 ### Architecture Principles
@@ -391,6 +392,428 @@ The dashboard provides an immediate overview of financial status and quick acces
 
 ---
 
+## Rails Backend Development Guide
+
+### Development Environment Setup
+
+**Prerequisites:**
+- Ruby 3.0+ installed (recommended: use rbenv or rvm)
+- PostgreSQL or MySQL database
+- Redis (for background jobs)
+- Node.js (for asset compilation if needed)
+
+**Initial Project Setup:**
+```bash
+# Create new Rails API project
+rails new roommate-manager-api --api --database=postgresql
+
+# Navigate to project directory
+cd roommate-manager-api
+
+# Install dependencies
+bundle install
+
+# Configure database
+rails db:create
+rails db:migrate
+rails db:seed
+
+# Start development servers
+rails server          # API server (port 3000)
+redis-server          # For background jobs
+bundle exec sidekiq   # Background job processor
+```
+
+### Essential Rails Development Commands
+
+**Database Management:**
+```bash
+# Create and run migrations
+rails generate migration CreateExpenses amount:decimal description:string
+rails db:migrate
+
+# Generate models with associations
+rails generate model User email:string name:string
+rails generate model Expense amount:decimal description:string user:references
+
+# Reset database (development only)
+rails db:reset
+rails db:drop db:create db:migrate db:seed
+
+# Rollback migrations
+rails db:rollback STEP=2
+
+# Check migration status
+rails db:migrate:status
+```
+
+**Code Generation:**
+```bash
+# Generate complete resources (model + controller + routes)
+rails generate resource Expense amount:decimal description:string user:references
+
+# Generate controllers only
+rails generate controller Api::V1::Expenses index create show update destroy
+
+# Generate serializers (if using active_model_serializers)
+rails generate serializer Expense amount description category status
+
+# Generate background jobs
+rails generate job ProcessReceipt
+```
+
+**Testing Commands:**
+```bash
+# Run all tests
+rails test                    # Default Rails testing
+bundle exec rspec            # RSpec tests
+bundle exec rspec spec/models # Run specific test types
+
+# Generate test files
+rails generate rspec:model Expense
+rails generate rspec:request Expenses
+```
+
+**Development Tools:**
+```bash
+# Interactive console (like Node.js REPL)
+rails console
+rails console --sandbox      # Rollback all changes on exit
+
+# Routes inspection
+rails routes
+rails routes | grep expense  # Filter specific routes
+
+# Database console
+rails dbconsole
+
+# Generate documentation
+bundle exec yard             # Generate API documentation
+```
+
+### Rails Project Structure for API
+
+```
+app/
+├── controllers/
+│   └── api/
+│       └── v1/
+│           ├── application_controller.rb
+│           ├── expenses_controller.rb
+│           ├── users_controller.rb
+│           └── shopping_items_controller.rb
+├── models/
+│   ├── user.rb
+│   ├── expense.rb
+│   └── shopping_item.rb
+├── serializers/
+│   ├── user_serializer.rb
+│   ├── expense_serializer.rb
+│   └── shopping_item_serializer.rb
+├── jobs/
+│   ├── application_job.rb
+│   └── receipt_processing_job.rb
+├── channels/
+│   ├── application_cable/
+│   └── shopping_list_channel.rb
+└── mailers/
+    └── user_mailer.rb
+
+config/
+├── routes.rb
+├── database.yml
+├── application.rb
+└── environments/
+    ├── development.rb
+    ├── production.rb
+    └── test.rb
+
+db/
+├── migrate/
+├── schema.rb
+└── seeds.rb
+
+spec/                        # RSpec tests
+├── models/
+├── requests/
+├── jobs/
+└── factories/
+
+Gemfile                      # Dependencies
+```
+
+### Core Rails Patterns for This Project
+
+**User Model with Roommate Relationship:**
+```ruby
+# app/models/user.rb
+class User < ApplicationRecord
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :validatable
+
+  has_many :expenses, dependent: :destroy
+  has_many :paid_expenses, class_name: 'Expense', foreign_key: 'paid_by_id'
+  has_many :shopping_items, dependent: :destroy
+
+  belongs_to :roommate, class_name: 'User', optional: true
+  has_one :roommate_connection, class_name: 'User', foreign_key: 'roommate_id'
+
+  validates :name, presence: true
+  validates :email, presence: true, uniqueness: true
+
+  def total_balance
+    expenses.sum(:amount) - paid_expenses.sum(:amount)
+  end
+end
+```
+
+**Expense Model with Business Logic:**
+```ruby
+# app/models/expense.rb
+class Expense < ApplicationRecord
+  belongs_to :user
+  belongs_to :paid_by, class_name: 'User'
+  has_one_attached :receipt
+
+  validates :amount, presence: true, numericality: { greater_than: 0 }
+  validates :description, presence: true, length: { minimum: 3 }
+
+  enum status: { pending: 0, settled: 1 }
+  enum category: {
+    groceries: 0,
+    utilities: 1,
+    household: 2,
+    dining: 3,
+    other: 4
+  }
+
+  scope :recent, -> { order(created_at: :desc) }
+  scope :by_category, ->(cat) { where(category: cat) }
+  scope :by_status, ->(status) { where(status: status) }
+
+  def split_amount
+    amount / 2.0  # For roommate pairs
+  end
+
+  def formatted_amount
+    "R$ #{amount.to_f.to_s.gsub('.', ',')}"
+  end
+end
+```
+
+**API Controller Pattern:**
+```ruby
+# app/controllers/api/v1/expenses_controller.rb
+class Api::V1::ExpensesController < Api::V1::ApplicationController
+  before_action :authenticate_user!
+  before_action :set_expense, only: [:show, :update, :destroy, :settle]
+
+  def index
+    @expenses = current_user.expenses
+                           .includes(:paid_by, receipt_attachment: :blob)
+                           .recent
+
+    @expenses = @expenses.by_category(params[:category]) if params[:category].present?
+    @expenses = @expenses.by_status(params[:status]) if params[:status].present?
+
+    render json: @expenses, each_serializer: ExpenseSerializer
+  end
+
+  def create
+    @expense = current_user.expenses.build(expense_params)
+    @expense.paid_by = current_user
+
+    if @expense.save
+      ExpenseNotificationJob.perform_later(@expense)
+      render json: @expense, serializer: ExpenseSerializer, status: :created
+    else
+      render json: { errors: @expense.errors }, status: :unprocessable_entity
+    end
+  end
+
+  def settle
+    @expense.update!(status: :settled)
+    render json: @expense, serializer: ExpenseSerializer
+  end
+
+  private
+
+  def expense_params
+    params.require(:expense).permit(:amount, :description, :category, :receipt)
+  end
+
+  def set_expense
+    @expense = current_user.expenses.find(params[:id])
+  end
+end
+```
+
+**Background Job for Processing:**
+```ruby
+# app/jobs/expense_notification_job.rb
+class ExpenseNotificationJob < ApplicationJob
+  queue_as :default
+
+  def perform(expense)
+    # Send notification to roommate
+    UserMailer.expense_added(expense).deliver_now
+
+    # Broadcast to real-time channel
+    ActionCable.server.broadcast(
+      "user_#{expense.user.roommate_id}",
+      {
+        type: 'expense_added',
+        expense: ExpenseSerializer.new(expense).as_json
+      }
+    )
+  end
+end
+```
+
+**Real-time Shopping List with Action Cable:**
+```ruby
+# app/channels/shopping_list_channel.rb
+class ShoppingListChannel < ApplicationCable::Channel
+  def subscribed
+    stream_from "shopping_list_#{current_user.id}"
+    stream_from "shopping_list_#{current_user.roommate_id}" if current_user.roommate
+  end
+
+  def add_item(data)
+    item = current_user.shopping_items.create!(
+      name: data['name'],
+      category: detect_category(data['name'])
+    )
+
+    broadcast_to_roommate('item_added', item)
+  end
+
+  def toggle_item(data)
+    item = current_user.shopping_items.find(data['id'])
+    item.update!(completed: !item.completed)
+
+    broadcast_to_roommate('item_toggled', item)
+  end
+
+  private
+
+  def broadcast_to_roommate(action, item)
+    ActionCable.server.broadcast(
+      "shopping_list_#{current_user.roommate_id}",
+      {
+        action: action,
+        item: ShoppingItemSerializer.new(item).as_json
+      }
+    )
+  end
+
+  def detect_category(name)
+    # Auto-categorization logic
+    case name.downcase
+    when /milk|cheese|yogurt/ then 'dairy'
+    when /banana|apple|fruit/ then 'produce'
+    when /chicken|beef|meat/ then 'meat'
+    else 'other'
+    end
+  end
+end
+```
+
+### Testing Patterns
+
+**Model Testing with RSpec:**
+```ruby
+# spec/models/expense_spec.rb
+RSpec.describe Expense, type: :model do
+  let(:user) { create(:user) }
+  let(:roommate) { create(:user) }
+
+  before { user.update(roommate: roommate) }
+
+  describe 'validations' do
+    it { should validate_presence_of(:amount) }
+    it { should validate_presence_of(:description) }
+    it { should validate_numericality_of(:amount).is_greater_than(0) }
+  end
+
+  describe 'associations' do
+    it { should belong_to(:user) }
+    it { should belong_to(:paid_by) }
+  end
+
+  describe '#split_amount' do
+    let(:expense) { create(:expense, amount: 100.00) }
+
+    it 'calculates 50% split for roommate pairs' do
+      expect(expense.split_amount).to eq(50.00)
+    end
+  end
+
+  describe 'scopes' do
+    let!(:grocery_expense) { create(:expense, category: 'groceries') }
+    let!(:utility_expense) { create(:expense, category: 'utilities') }
+
+    it 'filters by category' do
+      expect(Expense.by_category('groceries')).to include(grocery_expense)
+      expect(Expense.by_category('groceries')).not_to include(utility_expense)
+    end
+  end
+end
+```
+
+**Request Testing for API:**
+```ruby
+# spec/requests/api/v1/expenses_spec.rb
+RSpec.describe 'Api::V1::Expenses', type: :request do
+  let(:user) { create(:user) }
+  let(:headers) { auth_headers(user) }
+
+  describe 'GET /api/v1/expenses' do
+    let!(:expenses) { create_list(:expense, 3, user: user) }
+
+    it 'returns expenses for current user' do
+      get '/api/v1/expenses', headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.size).to eq(3)
+    end
+
+    it 'filters by category' do
+      create(:expense, user: user, category: 'groceries')
+      create(:expense, user: user, category: 'utilities')
+
+      get '/api/v1/expenses?category=groceries', headers: headers
+
+      expect(json_response.size).to eq(1)
+      expect(json_response.first['category']).to eq('groceries')
+    end
+  end
+
+  describe 'POST /api/v1/expenses' do
+    let(:expense_params) do
+      {
+        expense: {
+          amount: 50.00,
+          description: 'Groceries at Mercado',
+          category: 'groceries'
+        }
+      }
+    end
+
+    it 'creates a new expense' do
+      expect {
+        post '/api/v1/expenses', params: expense_params, headers: headers
+      }.to change(Expense, :count).by(1)
+
+      expect(response).to have_http_status(:created)
+      expect(json_response['amount']).to eq('50.0')
+    end
+  end
+end
+```
+
+---
+
 ## Implementation Details
 
 ### JavaScript Patterns
@@ -547,6 +970,50 @@ function validateForm(formId) {
 <input id="expense-amount" type="number" required>
 ```
 
+### shadcn/ui Integration Strategy
+
+**Framework Selection Rationale:**
+shadcn/ui was chosen for its modern approach to component libraries - components are copied into the codebase rather than imported as dependencies. This provides:
+- Full customization control for Brazilian localization
+- No external dependency risks
+- Easy modification for app-specific requirements
+- Built on proven Radix UI primitives
+- Perfect TypeScript support
+- Excellent Tailwind CSS integration
+
+**Essential Components for Roommate Manager:**
+```bash
+# Core UI (Phase 1)
+npx shadcn-ui@latest add button card input label badge avatar
+
+# Forms & Interactions (Phase 2)
+npx shadcn-ui@latest add form dialog sheet dropdown-menu select textarea
+
+# Data Display (Phase 3)
+npx shadcn-ui@latest add table calendar command popover toast tabs
+```
+
+**Component Hierarchy:**
+```
+src/components/
+├── ui/                    # shadcn/ui base components (auto-generated)
+├── expense/               # Expense-specific composites
+├── shopping/              # Shopping list components
+├── receipts/              # Receipt management
+├── dashboard/             # Dashboard widgets
+└── layout/                # App layout components
+```
+
+**Brazilian Localization Extensions:**
+- Currency: R$ 1.234,56 formatting
+- Dates: DD/MM/YYYY format
+- Forms: Portuguese validation messages
+- Calendar: Brazilian holidays support
+- Number formatting: Decimal comma convention
+
+**Migration from HTML Prototypes:**
+Each existing HTML screen component maps to shadcn-based React components, maintaining the same visual design while adding interactive capabilities and real-time features.
+
 ### Component Documentation
 
 **Button Components:**
@@ -653,22 +1120,30 @@ npx serve .
 ## Future Roadmap
 
 ### Phase 1: Backend Development (4 weeks)
-- [ ] Laravel API setup with authentication
-- [ ] Database schema implementation
-- [ ] CRUD operations for all entities
-- [ ] Real-time WebSocket integration
+- [ ] Ruby on Rails API setup with authentication
+- [ ] Database schema implementation with migrations
+- [ ] CRUD operations for all entities using Active Record
+- [ ] Real-time Action Cable integration for shopping lists
+- [ ] Background job processing with Sidekiq
+- [ ] File upload handling with Active Storage
 
 ### Phase 2: React Migration (6 weeks)
-- [ ] Component library development
-- [ ] State management (Redux/Context)
-- [ ] API integration with error handling
-- [ ] Advanced form validation
+- [ ] shadcn/ui setup and core component integration
+- [ ] Component library development (extend shadcn components)
+- [ ] State management (Zustand/Redux)
+- [ ] Rails API integration with error handling
+- [ ] Advanced form validation (client + server)
+- [ ] WebSocket integration with Action Cable
+- [ ] Authentication flow with JWT tokens
+- [ ] Custom component development for app-specific features
 
 ### Phase 3: Advanced Features (8 weeks)
 - [ ] OCR receipt scanning integration
 - [ ] Bank account connections (Open Banking)
-- [ ] Advanced reporting and analytics
+- [ ] Advanced reporting and analytics with Rails reporting gems
 - [ ] Multi-roommate support (3+ people)
+- [ ] Background job monitoring and management
+- [ ] API rate limiting and security enhancements
 
 ### Phase 4: Mobile & Polish (4 weeks)
 - [ ] Progressive Web App implementation
@@ -677,11 +1152,27 @@ npx serve .
 - [ ] Performance optimization
 
 ### Future Enhancements
-- Machine learning for expense categorization
-- Integration with popular payment apps
-- Shared budget planning features
-- Expense approval workflows
-- Integration with accounting software
+
+**Phase 5: Internationalization (4 weeks)**
+- [ ] **Multi-language Support (i18n):** Framework implementation with Rails I18n
+- [ ] **Portuguese (Brasil):** Primary language (default)
+- [ ] **English:** Secondary language for international users
+- [ ] **Spanish:** Third language for LATAM expansion
+- [ ] **Localization Framework:** Prepared for additional languages
+- [ ] **Currency Localization:** Multi-currency support with exchange rates
+- [ ] **Date/Number Formatting:** Region-specific formatting patterns
+- [ ] **Cultural Adaptations:** Local payment methods and preferences
+
+**Long-term Enhancements:**
+- Advanced machine learning for expense categorization
+- Integration with popular payment apps (PIX, PayPal, Stripe, Mercado Pago)
+- Shared budget planning and financial goals
+- Expense approval workflows for group living
+- Integration with accounting software (QuickBooks, ContaAzul)
+- Multi-currency support with real-time exchange rates
+- Advanced reporting and analytics dashboard
+- Mobile app development (React Native)
+- Offline-first functionality with sync capabilities
 
 ---
 
