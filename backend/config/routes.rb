@@ -9,6 +9,16 @@ Rails.application.routes.draw do
           patch :settle
         end
       end
+
+      resources :shopping_items do
+        member do
+          patch :toggle
+        end
+        collection do
+          delete :clear_completed
+          get :stats
+        end
+      end
     end
   end
 
