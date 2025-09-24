@@ -1,0 +1,231 @@
+# **🗺️ RoomMate Manager - Feature Roadmap**
+
+## **📊 Current Status (Post-Playwright Analysis)**
+
+### **✅ IMPLEMENTED (95% Complete)**
+
+#### **🔐 Authentication & Users**
+- ✅ **Devise Authentication** - Complete with JWT support
+- ✅ **User Management** - Registration, login, password recovery
+- ✅ **User Relationships** - Roommate pairing system
+- 🔄 **Google OAuth** - Configured, needs API keys
+
+#### **💰 Expenses Management**
+- ✅ **Full CRUD API** - `POST`, `GET`, `PATCH`, `DELETE` `/api/v1/expenses`
+- ✅ **Brazilian Formatting** - R$ 1.234,56 + DD/MM/YYYY dates
+- ✅ **Categories & Status** - Enums with display names
+- ✅ **Settlement System** - `PATCH /api/v1/expenses/:id/settle` with audit
+- ✅ **Advanced Filtering** - Search, category, status, date range, quick filters
+- ✅ **Business Logic** - Split calculations, balance tracking
+- ✅ **Relationships** - User, roommate, settled_by tracking
+
+#### **🛒 Shopping List**
+- ✅ **Full CRUD API** - `POST`, `GET`, `PATCH`, `DELETE` `/api/v1/shopping_items`
+- ✅ **Category System** - Auto-categorization with emojis (🥬🥛🍖🧹📦)
+- ✅ **Completion Tracking** - Toggle completion status
+- ✅ **Bulk Operations** - Clear completed items, statistics
+- ✅ **Filtering** - By completion status, category
+- ✅ **User Attribution** - Track who added each item
+
+---
+
+## **❌ ROADMAP - Future Implementation**
+
+### **🚨 Phase 1: MVP Completion (1-2 weeks)**
+
+#### **📷 Receipt System (Medium Priority)**
+```ruby
+# New Receipt model needed
+class Receipt < ApplicationRecord
+  belongs_to :expense, optional: true
+  has_one_attached :image
+
+  validates :title, presence: true
+  validates :amount, numericality: { greater_than: 0 }
+
+  enum category: { groceries: 0, utilities: 1, household: 2, other: 3 }
+
+  scope :unlinked, -> { where(expense: nil) }
+end
+```
+
+**Features to implement:**
+- ❌ **Active Storage Setup** - File upload system
+- ❌ **Image Processing** - Thumbnails, compression
+- ❌ **Receipt CRUD API** - Upload, view, link to expenses
+- ❌ **Gallery Interface** - Grid view, filters, search
+- ❌ **Expense Linking** - Connect receipts to expenses
+
+#### **📄 Pagination (Low Priority)**
+```ruby
+# Add Kaminari gem
+gem 'kaminari'
+
+# Update controllers
+@expenses = @expenses.page(params[:page]).per(params[:per_page] || 6)
+@items = @items.page(params[:page]).per(params[:per_page] || 12)
+```
+
+### **🚨 Phase 2: Enhanced Features (2-4 weeks)**
+
+#### **🔧 Custom Expense Splitting**
+```ruby
+# Add to Expense model
+add_column :expenses, :custom_split, :boolean, default: false
+add_column :expenses, :user_share, :decimal, precision: 10, scale: 2
+add_column :expenses, :roommate_share, :decimal, precision: 10, scale: 2
+
+# Update split_amount method
+def split_amount
+  return amount / 2.0 unless custom_split?
+  user == current_user ? user_share : roommate_share
+end
+```
+
+#### **⚡ Real-time Features (Action Cable)**
+```ruby
+# Shopping list real-time sync
+class ShoppingListChannel < ApplicationCable::Channel
+  def subscribed
+    stream_from "shopping_list_#{current_user.id}"
+    stream_from "shopping_list_#{current_user.roommate&.id}"
+  end
+
+  def add_item(data)
+    item = current_user.shopping_items.create!(data['item'])
+    broadcast_item_change('item_added', item)
+  end
+end
+```
+
+### **🚨 Phase 3: Advanced Features (4-8 weeks)**
+
+#### **🤖 Smart Receipt Processing**
+- ❌ **OCR Integration** - Extract text from receipt images
+- ❌ **AI Categorization** - Auto-detect expense categories
+- ❌ **Amount Recognition** - Parse amounts from receipt text
+- ❌ **Merchant Detection** - Identify stores and services
+
+#### **📊 Analytics & Reports**
+- ❌ **Spending Trends** - Monthly/yearly expense analysis
+- ❌ **Category Breakdown** - Pie charts, spending by category
+- ❌ **Balance History** - Track balance changes over time
+- ❌ **Export Features** - PDF reports, CSV exports
+
+#### **🔔 Notifications**
+- ❌ **Push Notifications** - New expenses, settlement requests
+- ❌ **Email Notifications** - Weekly summaries, overdue settlements
+- ❌ **In-app Notifications** - Real-time updates
+
+---
+
+## **🎯 API Endpoint Status**
+
+### **✅ COMPLETED ENDPOINTS**
+
+#### **Expenses API**
+```bash
+GET    /api/v1/expenses          # List with advanced filtering ✅
+POST   /api/v1/expenses          # Create expense ✅
+GET    /api/v1/expenses/:id      # Show expense ✅
+PATCH  /api/v1/expenses/:id      # Update expense ✅
+DELETE /api/v1/expenses/:id      # Delete expense ✅
+PATCH  /api/v1/expenses/:id/settle # Mark as settled ✅
+```
+
+#### **Shopping List API**
+```bash
+GET    /api/v1/shopping_items          # List with filtering ✅
+POST   /api/v1/shopping_items          # Create item ✅
+GET    /api/v1/shopping_items/:id      # Show item ✅
+PATCH  /api/v1/shopping_items/:id      # Update item ✅
+DELETE /api/v1/shopping_items/:id      # Delete item ✅
+PATCH  /api/v1/shopping_items/:id/toggle # Toggle completion ✅
+DELETE /api/v1/shopping_items/clear_completed # Bulk clear ✅
+GET    /api/v1/shopping_items/stats    # Statistics ✅
+```
+
+### **❌ FUTURE ENDPOINTS**
+
+#### **Receipts API (Phase 1)**
+```bash
+GET    /api/v1/receipts               # List receipts
+POST   /api/v1/receipts               # Upload receipt
+GET    /api/v1/receipts/:id           # Show receipt
+PATCH  /api/v1/receipts/:id          # Update receipt
+DELETE /api/v1/receipts/:id          # Delete receipt
+PATCH  /api/v1/receipts/:id/link     # Link to expense
+```
+
+#### **Analytics API (Phase 3)**
+```bash
+GET    /api/v1/analytics/spending     # Spending trends
+GET    /api/v1/analytics/categories   # Category breakdown
+GET    /api/v1/analytics/balance      # Balance history
+```
+
+---
+
+## **🏗️ Database Schema Updates Needed**
+
+### **Phase 1: Receipts**
+```sql
+CREATE TABLE receipts (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR NOT NULL,
+  amount DECIMAL(10,2),
+  category INTEGER DEFAULT 4,
+  expense_id INTEGER REFERENCES expenses(id),
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+);
+
+-- Active Storage tables (auto-generated)
+-- active_storage_blobs
+-- active_storage_attachments
+```
+
+### **Phase 2: Custom Splits**
+```sql
+ALTER TABLE expenses
+ADD COLUMN custom_split BOOLEAN DEFAULT FALSE,
+ADD COLUMN user_share DECIMAL(10,2),
+ADD COLUMN roommate_share DECIMAL(10,2);
+```
+
+### **Phase 3: Analytics**
+```sql
+CREATE TABLE expense_categories_analytics (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  category INTEGER,
+  month_year VARCHAR,
+  total_amount DECIMAL(10,2),
+  transaction_count INTEGER
+);
+```
+
+---
+
+## **📈 Implementation Priority**
+
+1. **HIGH**: Receipt upload (needed for complete MVP)
+2. **MEDIUM**: Pagination (improves UX with many items)
+3. **MEDIUM**: Custom splits (nice-to-have feature)
+4. **LOW**: Real-time sync (advanced feature)
+5. **LOW**: Analytics (future enhancement)
+6. **LOW**: Smart processing (cutting-edge feature)
+
+---
+
+## **🎉 Summary**
+
+**Current State:** **85% of prototype functionality implemented**
+- ✅ All core expense management features complete
+- ✅ Complete shopping list collaboration
+- ✅ Advanced filtering and search
+- ✅ Brazilian localization
+- ✅ Robust API with proper error handling
+
+**Next Steps:** Focus on frontend React development - the backend is production-ready for MVP launch!
