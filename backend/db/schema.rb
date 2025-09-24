@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_24_162156) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_24_202153) do
   create_table "expenses", force: :cascade do |t|
     t.decimal "amount", precision: 10, scale: 2
     t.string "description"
@@ -25,6 +25,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_24_162156) do
     t.index ["roommate_id"], name: "index_expenses_on_roommate_id"
     t.index ["settled_by_id"], name: "index_expenses_on_settled_by_id"
     t.index ["user_id"], name: "index_expenses_on_user_id"
+  end
+
+  create_table "receipts", force: :cascade do |t|
+    t.string "title", null: false
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.integer "expense_id"
+    t.integer "user_id", null: false
+    t.integer "category", default: 0
+    t.integer "status", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category"], name: "index_receipts_on_category"
+    t.index ["created_at"], name: "index_receipts_on_created_at"
+    t.index ["expense_id"], name: "index_receipts_on_expense_id"
+    t.index ["status"], name: "index_receipts_on_status"
+    t.index ["user_id"], name: "index_receipts_on_user_id"
   end
 
   create_table "shopping_items", force: :cascade do |t|
@@ -55,6 +71,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_24_162156) do
   add_foreign_key "expenses", "users"
   add_foreign_key "expenses", "users", column: "roommate_id"
   add_foreign_key "expenses", "users", column: "settled_by_id"
+  add_foreign_key "receipts", "expenses"
+  add_foreign_key "receipts", "users"
   add_foreign_key "shopping_items", "users"
   add_foreign_key "shopping_items", "users", column: "roommate_id"
 end

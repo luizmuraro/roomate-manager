@@ -1,4 +1,6 @@
 class ExpenseSerializer < ActiveModel::Serializer
+  include CurrencyFormatting
+
   attributes :id, :description, :amount, :your_share, :category, :category_display,
              :status, :status_display, :date, :settled_at, :settled_by
 
@@ -38,26 +40,4 @@ class ExpenseSerializer < ActiveModel::Serializer
     }
   end
 
-  private
-
-  def format_currency(amount)
-    return { raw: 0.0, formatted: "R$ 0,00" } if amount.nil?
-
-    {
-      raw: amount.to_f,
-      formatted: format_brazilian_currency(amount.to_f)
-    }
-  end
-
-  def format_brazilian_currency(amount)
-    # Converte para formato brasileiro: R$ 1.234,56
-    formatted = sprintf("%.2f", amount)
-    formatted = formatted.gsub('.', ',')  # Decimal vírgula
-
-    # Adiciona pontos nos milhares
-    integer_part, decimal_part = formatted.split(',')
-    integer_part = integer_part.reverse.gsub(/(\d{3})(?=\d)/, '\\1.').reverse
-
-    "R$ #{integer_part},#{decimal_part}"
-  end
 end

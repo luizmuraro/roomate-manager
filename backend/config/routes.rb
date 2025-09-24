@@ -19,6 +19,15 @@ Rails.application.routes.draw do
           get :stats
         end
       end
+
+      resources :receipts do
+        member do
+          patch :link_to_expense
+        end
+        collection do
+          get :stats
+        end
+      end
     end
   end
 

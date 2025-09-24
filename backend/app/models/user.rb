@@ -15,6 +15,9 @@ class User < ApplicationRecord
   has_many :shopping_items, dependent: :destroy
   has_many :roommate_shopping_items, class_name: 'ShoppingItem', foreign_key: 'roommate_id', dependent: :destroy
 
+  # Receipts relationships
+  has_many :receipts, dependent: :destroy
+
   def full_name
     name
   end
