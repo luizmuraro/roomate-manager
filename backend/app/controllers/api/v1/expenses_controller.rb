@@ -3,7 +3,40 @@ class Api::V1::ExpensesController < ApplicationController
   before_action :set_expense, only: [:show, :update, :destroy, :settle]
 
   def index
-    @expenses = current_user.all_expenses.includes(:user, :roommate, :settled_by).recent
+    @expenses = current_user.all_expenses.includes(:user, :roommate, :settled_by)
+
+    # Filtros básicos
+    @expenses = @expenses.where("description ILIKE ?", "%#{params[:search]}%") if params[:search].present?
+    @expenses = @expenses.where(category: params[:category]) if params[:category].present?
+    @expenses = @expenses.where(status: params[:status]) if params[:status].present?
+
+    # Quick filters
+    @expenses = @expenses.where(user: current_user) if params[:paid_by] == 'you'
+    @expenses = @expenses.where.not(user: current_user) if params[:paid_by] == 'roommate'
+    @expenses = @expenses.where('amount > ?', 100) if params[:high_value] == 'true'
+
+    # Date range filter
+    if params[:date_from].present?
+      @expenses = @expenses.where('created_at >= ?', Date.parse(params[:date_from]))
+    end
+    if params[:date_to].present?
+      @expenses = @expenses.where('created_at <= ?', Date.parse(params[:date_to]))
+    end
+
+    # Ordenação
+    case params[:sort_by]
+    when 'amount_desc'
+      @expenses = @expenses.order(amount: :desc)
+    when 'amount_asc'
+      @expenses = @expenses.order(amount: :asc)
+    when 'date_desc'
+      @expenses = @expenses.order(created_at: :desc)
+    when 'date_asc'
+      @expenses = @expenses.order(created_at: :asc)
+    else
+      @expenses = @expenses.recent
+    end
+
     render json: @expenses, each_serializer: ExpenseSerializer
   end
 
