@@ -1,0 +1,32 @@
+{
+  "name": "roommate-manager",
+  "version": "1.0.0",
+  "description": "Collaborative expense management web application for roommate pairs",
+  "private": true,
+  "scripts": {
+    "create-pr": "./scripts/create-pr-interactive.sh",
+    "capture-screenshots": "./scripts/capture-screenshots.sh",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:lint": "cd frontend && npm run lint",
+    "backend:dev": "cd backend && rails server",
+    "backend:test": "cd backend && rails test",
+    "backend:migrate": "cd backend && rails db:migrate",
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend && bundle install"
+  },
+  "keywords": [
+    "roommate",
+    "expense-management",
+    "collaborative",
+    "nextjs",
+    "rails",
+    "brazilian-localization"
+  ],
+  "author": "muraro",
+  "license": "MIT",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}
