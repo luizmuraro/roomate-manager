@@ -1,0 +1,66 @@
+# CodeRabbit AI Configuration for RoomMate Manager
+# Optimized for Ruby on Rails 8.0.3 with Brazilian localization
+
+# Review configuration
+reviews:
+  # Focus on Rails-specific patterns and Brazilian localization
+  path_filters:
+    include:
+      - "backend/**/*.rb"
+      - "backend/**/*.yml"
+      - "backend/**/*.yaml"
+      - "backend/Gemfile*"
+      - "backend/config/**/*"
+      - "backend/db/migrate/**/*"
+      - "spec/**/*.rb"
+    exclude:
+      - "backend/db/schema.rb"
+      - "backend/log/**/*"
+      - "backend/tmp/**/*"
+      - "backend/coverage/**/*"
+      - "backend/.byebug_history"
+      - "backend/vendor/**/*"
+      - "**/*.log"
+
+  # AI review settings
+  high_level_summary: true
+  poem: false
+  review_simple_changes: true
+
+  # Brazilian-specific context
+  custom_rules:
+    - name: "Brazilian Currency Format"
+      pattern: ".*currency.*|.*money.*|.*amount.*"
+      description: "Ensure Brazilian currency format (R$ 1.234,56) is used"
+
+    - name: "Brazilian Date Format"
+      pattern: ".*date.*|.*time.*"
+      description: "Verify DD/MM/YYYY format for Brazilian users"
+
+    - name: "Portuguese Localization"
+      pattern: ".*i18n.*|.*locale.*|.*translation.*"
+      description: "Check Portuguese (Brasil) translations and formatting"
+
+    - name: "Rails Best Practices"
+      pattern: ".*controller.*|.*model.*|.*serializer.*"
+      description: "Review Rails conventions, security, and performance"
+
+# Language-specific settings
+language_tool:
+  enabled: true
+  language: "pt-BR"
+
+# Security focus areas
+security:
+  - sql_injection
+  - xss_prevention
+  - authentication
+  - authorization
+  - sensitive_data
+
+# Performance focus areas
+performance:
+  - n_plus_one_queries
+  - database_indexes
+  - caching_opportunities
+  - memory_usage
