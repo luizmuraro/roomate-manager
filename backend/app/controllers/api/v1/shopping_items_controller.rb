@@ -11,7 +11,22 @@ class Api::V1::ShoppingItemsController < ApplicationController
     @items = @items.where(completed: params[:completed]) if params[:completed].present?
     @items = @items.where(category: params[:category]) if params[:category].present?
 
-    render json: @items, each_serializer: ShoppingItemSerializer
+    # Paginação - Shopping lists geralmente são menores, mais itens por página
+    page = params[:page] || 1
+    per_page = [params[:per_page]&.to_i || 20, 100].min # Default 20 items
+    @items = @items.page(page).per(per_page)
+
+    render json: {
+      shopping_items: @items.map { |item| ShoppingItemSerializer.new(item).as_json },
+      pagination: {
+        current_page: @items.current_page,
+        per_page: @items.limit_value,
+        total_pages: @items.total_pages,
+        total_count: @items.total_count,
+        next_page: @items.next_page,
+        prev_page: @items.prev_page
+      }
+    }
   end
 
   def show

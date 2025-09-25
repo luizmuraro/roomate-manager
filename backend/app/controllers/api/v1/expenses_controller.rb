@@ -37,7 +37,22 @@ class Api::V1::ExpensesController < ApplicationController
       @expenses = @expenses.recent
     end
 
-    render json: @expenses, each_serializer: ExpenseSerializer
+    # Paginação
+    page = params[:page] || 1
+    per_page = [params[:per_page]&.to_i || 10, 100].min # Max 100 items per page
+    @expenses = @expenses.page(page).per(per_page)
+
+    render json: {
+      expenses: @expenses.map { |expense| ExpenseSerializer.new(expense).as_json },
+      pagination: {
+        current_page: @expenses.current_page,
+        per_page: @expenses.limit_value,
+        total_pages: @expenses.total_pages,
+        total_count: @expenses.total_count,
+        next_page: @expenses.next_page,
+        prev_page: @expenses.prev_page
+      }
+    }
   end
 
   def show
