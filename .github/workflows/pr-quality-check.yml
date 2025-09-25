@@ -1,0 +1,237 @@
+name: 🤖 PR Quality & AI Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, develop]
+
+jobs:
+  # Job 1: Automated Code Quality Checks
+  quality-checks:
+    name: 📊 Code Quality Analysis
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ruby-version: ['3.3.0']
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: roommate_manager_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 💎 Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true
+          working-directory: backend
+
+      - name: 📦 Install dependencies
+        working-directory: backend
+        run: |
+          bundle install
+
+      - name: 🗄️ Setup Database
+        working-directory: backend
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/roommate_manager_test
+        run: |
+          bundle exec rails db:create
+          bundle exec rails db:migrate
+
+      - name: 🧪 Run RSpec Tests
+        working-directory: backend
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/roommate_manager_test
+        run: |
+          bundle exec rspec --format progress --format RspecJunitFormatter --out tmp/rspec_results.xml
+
+      - name: 📊 Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: backend/tmp/rspec_results.xml
+          comment_mode: create new
+          check_name: "RSpec Test Results"
+
+      - name: 🔍 Run RuboCop (Linting)
+        working-directory: backend
+        run: |
+          bundle exec rubocop --format github
+        continue-on-error: true
+
+      - name: 🛡️ Security Audit with Brakeman
+        working-directory: backend
+        run: |
+          bundle exec brakeman --format json --output tmp/brakeman_results.json --exit-on-warn --exit-on-error
+        continue-on-error: true
+
+      - name: 📈 Upload Coverage to CodeClimate
+        uses: paambaati/codeclimate-action@v5.0.0
+        if: github.event_name == 'pull_request'
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageLocations: backend/coverage/lcov.info:lcov
+        continue-on-error: true
+
+  # Job 2: AI-Powered Code Review Comments
+  ai-review:
+    name: 🤖 AI Code Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🤖 AI Code Review with CodeRabbit
+        uses: coderabbitai/coderabbit-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+        continue-on-error: true
+
+  # Job 3: Dependency Security Check
+  security-check:
+    name: 🔒 Security Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 💎 Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3.0'
+          bundler-cache: true
+          working-directory: backend
+
+      - name: 🔍 Run bundle-audit
+        working-directory: backend
+        run: |
+          gem install bundle-audit
+          bundle audit check --update
+
+  # Job 4: Performance Analysis
+  performance-check:
+    name: ⚡ Performance Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 💎 Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3.0'
+          bundler-cache: true
+          working-directory: backend
+
+      - name: ⚡ Performance Analysis
+        working-directory: backend
+        run: |
+          # Add performance benchmarks here if needed
+          echo "🚀 Performance checks would run here"
+          bundle exec rails runner "puts 'Rails app loads successfully'"
+
+  # Job 5: PR Summary Comment
+  pr-summary:
+    name: 📝 PR Summary
+    runs-on: ubuntu-latest
+    needs: [quality-checks, security-check]
+    if: always()
+
+    steps:
+      - name: 📝 Create PR Summary Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { context } = require('@actions/github');
+            const qualityStatus = '${{ needs.quality-checks.result }}';
+            const securityStatus = '${{ needs.security-check.result }}';
+
+            const getStatusEmoji = (status) => {
+              switch(status) {
+                case 'success': return '✅';
+                case 'failure': return '❌';
+                case 'cancelled': return '⏹️';
+                case 'skipped': return '⏭️';
+                default: return '⏳';
+              }
+            };
+
+            const summary = `## 🤖 Automated PR Analysis Summary
+
+            | Check | Status | Result |
+            |-------|--------|---------|
+            | 🧪 Tests & Quality | ${getStatusEmoji(qualityStatus)} | ${qualityStatus} |
+            | 🔒 Security Scan | ${getStatusEmoji(securityStatus)} | ${securityStatus} |
+            | 🤖 AI Review | 🔄 | In Progress |
+
+            ### 📊 Key Metrics
+            - **Language**: Ruby (Rails 8.0.3)
+            - **Test Framework**: RSpec
+            - **Linting**: RuboCop
+            - **Security**: Brakeman + Bundle Audit
+            - **AI Review**: CodeRabbit
+
+            ### 🚀 Next Steps
+            ${qualityStatus === 'success' && securityStatus === 'success' ?
+              '🎉 **All checks passed!** This PR is ready for human review.' :
+              '⚠️ **Some checks failed.** Please review the details above and fix any issues.'
+            }
+
+            ---
+            🤖 *This comment was automatically generated by GitHub Actions*
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+  # Job 6: Auto-approve if all checks pass (optional)
+  auto-approve:
+    name: 🔄 Auto Actions
+    runs-on: ubuntu-latest
+    needs: [quality-checks, security-check]
+    if: needs.quality-checks.result == 'success' && needs.security-check.result == 'success' && github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: 👍 Auto-approve Dependabot PRs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: 'APPROVE',
+              body: '🤖 Auto-approved by GitHub Actions - all checks passed!'
+            });

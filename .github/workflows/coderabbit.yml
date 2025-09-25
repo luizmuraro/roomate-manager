@@ -1,0 +1,61 @@
+name: 🧠 CodeRabbit AI Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  pull_request_review_comment:
+    types: [created]
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}-${{ github.event_name == 'pull_request_review_comment' && 'pr_comment' || 'pr' }}
+  cancel-in-progress: ${{ github.event_name != 'pull_request_review_comment' }}
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    name: 🤖 AI Code Review
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🧠 CodeRabbit Review
+        uses: coderabbitai/coderabbit-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          debug: false
+          # Configurações específicas para Ruby/Rails
+          review_simple_changes: true
+          review_comment_lgtm: false
+          # Foco em aspectos específicos do Rails
+          path_filters: |
+            !db/schema.rb
+            !db/development.sqlite3*
+            !coverage/**
+            !tmp/**
+            !log/**
+            !.byebug_history
+            !Gemfile.lock
+          # Templates customizados para o projeto
+          system_message: |
+            You are reviewing a Ruby on Rails 8.0.3 API backend for a Brazilian roommate expense management application.
+
+            Key context:
+            - This is a RESTful API with Brazilian localization (R$ currency, DD/MM/YYYY dates)
+            - Uses RSpec for testing, RuboCop for linting
+            - Implements Expenses, Shopping Lists, and Receipts management
+            - Focus on Rails best practices, security, and Brazilian formatting
+
+            When reviewing:
+            1. Check for Rails conventions and best practices
+            2. Verify Brazilian localization consistency (currency, dates)
+            3. Ensure proper error handling and validations
+            4. Review security implications (SQL injection, XSS, etc.)
+            5. Suggest performance optimizations
+            6. Check test coverage and quality
+
+            Be constructive and educational in your feedback.
