@@ -5,7 +5,7 @@ class Api::V1::ExpensesController < ApplicationController
   def index
     @expenses = current_user.all_expenses.includes(:user, :roommate, :settled_by)
 
-    # Filtros básicos
+    # Basic filters
     @expenses = @expenses.where("description ILIKE ?", "%#{params[:search]}%") if params[:search].present?
     @expenses = @expenses.where(category: params[:category]) if params[:category].present?
     @expenses = @expenses.where(status: params[:status]) if params[:status].present?
@@ -23,7 +23,7 @@ class Api::V1::ExpensesController < ApplicationController
       @expenses = @expenses.where('created_at <= ?', Date.parse(params[:date_to]))
     end
 
-    # Ordenação
+    # Sorting
     case params[:sort_by]
     when 'amount_desc'
       @expenses = @expenses.order(amount: :desc)
@@ -37,7 +37,22 @@ class Api::V1::ExpensesController < ApplicationController
       @expenses = @expenses.recent
     end
 
-    render json: @expenses, each_serializer: ExpenseSerializer
+    # Pagination
+    page = params[:page] || 1
+    per_page = [params[:per_page]&.to_i || 10, 100].min # Max 100 items per page
+    @expenses = @expenses.page(page).per(per_page)
+
+    render json: {
+      expenses: @expenses.map { |expense| ExpenseSerializer.new(expense).as_json },
+      pagination: {
+        current_page: @expenses.current_page,
+        per_page: @expenses.limit_value,
+        total_pages: @expenses.total_pages,
+        total_count: @expenses.total_count,
+        next_page: @expenses.next_page,
+        prev_page: @expenses.prev_page
+      }
+    }
   end
 
   def show

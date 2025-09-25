@@ -53,11 +53,11 @@ class Receipt < ApplicationRecord
     return unless image.attached?
 
     if image.byte_size > 10.megabytes
-      errors.add(:image, 'deve ter menos de 10MB')
+      errors.add(:image, 'must be less than 10MB')
     end
 
     unless image.content_type.in?(%w[image/jpeg image/jpg image/png image/webp application/pdf])
-      errors.add(:image, 'deve ser JPG, PNG, WebP ou PDF')
+      errors.add(:image, 'must be JPG, PNG, WebP, or PDF')
     end
   end
 end

@@ -33,7 +33,22 @@ class Api::V1::ReceiptsController < ApplicationController
       @receipts = @receipts.recent
     end
 
-    render json: @receipts, each_serializer: ReceiptSerializer
+    # Pagination - Receipts can be many, smaller pagination for performance
+    page = params[:page] || 1
+    per_page = [params[:per_page]&.to_i || 12, 100].min # Default 12 items (grid layout)
+    @receipts = @receipts.page(page).per(per_page)
+
+    render json: {
+      receipts: @receipts.map { |receipt| ReceiptSerializer.new(receipt).as_json },
+      pagination: {
+        current_page: @receipts.current_page,
+        per_page: @receipts.limit_value,
+        total_pages: @receipts.total_pages,
+        total_count: @receipts.total_count,
+        next_page: @receipts.next_page,
+        prev_page: @receipts.prev_page
+      }
+    }
   end
 
   def show

@@ -43,6 +43,9 @@ gem "devise-jwt"
 # JSON API serialization
 gem "active_model_serializers"
 
+# Pagination
+gem "kaminari"
+
 # Image processing for receipts
 gem "image_processing", "~> 1.2"
 
@@ -69,11 +72,6 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
-
-  # Testing framework
-  gem "rspec-rails"
-  gem "factory_bot_rails"
-  gem "faker"
 
   # API testing
   gem "json_matchers"
