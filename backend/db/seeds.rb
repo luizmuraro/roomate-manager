@@ -1,14 +1,14 @@
 # This file should ensure the existence of records required to run the application in every environment (production,
 # development, test). The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
 
-puts "🌱 Criando dados de teste..."
+puts "🌱 Creating test data..."
 
-# Limpar dados existentes
+# Clear existing data
 User.destroy_all
 Expense.destroy_all
 ShoppingItem.destroy_all
 
-# Criar usuários (companheiros de quarto)
+# Create users (roommates)
 joão = User.create!(
   name: "João Silva",
   email: "joao@roommate.com",
@@ -23,9 +23,9 @@ maria = User.create!(
   password_confirmation: "123456"
 )
 
-puts "✅ Usuários criados: #{User.count}"
+puts "✅ Users created: #{User.count}"
 
-# Criar despesas de exemplo
+# Create sample expenses
 expenses_data = [
   {
     description: "Compras no supermercado",
@@ -62,12 +62,12 @@ expenses_data = [
 
 expenses_data.each do |expense_attrs|
   expense = Expense.create!(expense_attrs)
-  puts "💰 Criada despesa: #{expense.description} - #{expense.amount}"
+  puts "💰 Expense created: #{expense.description} - #{expense.amount}"
 end
 
-puts "✅ Despesas criadas: #{Expense.count}"
+puts "✅ Expenses created: #{Expense.count}"
 
-# Criar itens de lista de compras
+# Create shopping list items
 shopping_items_data = [
   {
     name: "Leite integral 1L",
@@ -105,19 +105,19 @@ shopping_items_data = [
 shopping_items_data.each do |item_attrs|
   item = ShoppingItem.create!(item_attrs)
   status = item.completed? ? "✅" : "⏳"
-  puts "🛒 #{status} Item criado: #{item.name} (#{item.category_emoji})"
+  puts "🛒 #{status} Item created: #{item.name} (#{item.category_emoji})"
 end
 
-puts "✅ Lista de compras criada: #{ShoppingItem.count} itens"
+puts "✅ Shopping list created: #{ShoppingItem.count} items"
 puts ""
-puts "🎉 Seed finalizado!"
-puts "👥 Usuários: #{User.count}"
-puts "💰 Despesas: #{Expense.count}"
-puts "🛒 Itens de compras: #{ShoppingItem.count}"
+puts "🎉 Seeding completed!"
+puts "👥 Users: #{User.count}"
+puts "💰 Expenses: #{Expense.count}"
+puts "🛒 Shopping items: #{ShoppingItem.count}"
 puts ""
-puts "🔑 Login de teste:"
+puts "🔑 Test login:"
 puts "   Email: joao@roommate.com"
-puts "   Senha: 123456"
+puts "   Password: 123456"
 puts ""
 puts "   Email: maria@roommate.com"
-puts "   Senha: 123456"
+puts "   Password: 123456"

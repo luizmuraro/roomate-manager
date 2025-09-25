@@ -7,11 +7,11 @@ class Api::V1::ShoppingItemsController < ApplicationController
       .includes(:user, :roommate)
       .recent
 
-    # Filtros
+    # Filters
     @items = @items.where(completed: params[:completed]) if params[:completed].present?
     @items = @items.where(category: params[:category]) if params[:category].present?
 
-    # Paginação - Shopping lists geralmente são menores, mais itens por página
+    # Pagination - Shopping lists are usually smaller, more items per page
     page = params[:page] || 1
     per_page = [params[:per_page]&.to_i || 20, 100].min # Default 20 items
     @items = @items.page(page).per(per_page)

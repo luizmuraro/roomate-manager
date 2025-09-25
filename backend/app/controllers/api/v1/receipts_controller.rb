@@ -33,7 +33,7 @@ class Api::V1::ReceiptsController < ApplicationController
       @receipts = @receipts.recent
     end
 
-    # Paginação - Receipts podem ser muitos, paginação menor para performance
+    # Pagination - Receipts can be many, smaller pagination for performance
     page = params[:page] || 1
     per_page = [params[:per_page]&.to_i || 12, 100].min # Default 12 items (grid layout)
     @receipts = @receipts.page(page).per(per_page)
