@@ -1,102 +1,58 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colors optimized for roommate expense management */
-  --color-background: 0 0% 100%;
-  --color-foreground: 240 10% 3.9%;
+  /* Colors optimized for roommate expense management - using proper hex format */
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
 
-  --color-card: 0 0% 100%;
-  --color-card-foreground: 240 10% 3.9%;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
 
-  --color-popover: 0 0% 100%;
-  --color-popover-foreground: 240 10% 3.9%;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0f172a;
 
   /* Primary - Blue for expense actions */
-  --color-primary: 221 83% 58%;
-  --color-primary-foreground: 0 0% 100%;
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
 
   /* Secondary - Neutral for secondary actions */
-  --color-secondary: 210 40% 96%;
-  --color-secondary-foreground: 222.2 84% 4.9%;
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #0f172a;
 
   /* Muted - For subtle text and backgrounds */
-  --color-muted: 210 40% 96%;
-  --color-muted-foreground: 215.4 16.3% 46.9%;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
 
   /* Accent - For highlights and important elements */
-  --color-accent: 210 40% 96%;
-  --color-accent-foreground: 222.2 84% 4.9%;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #0f172a;
 
   /* Success - Green for settled expenses */
-  --color-success: 142.1 76.2% 36.3%;
-  --color-success-foreground: 355.7 100% 97.3%;
+  --color-success: #10b981;
+  --color-success-foreground: #ffffff;
 
   /* Warning - Orange for pending expenses */
-  --color-warning: 32.2 94.6% 43.7%;
-  --color-warning-foreground: 210 40% 98%;
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #ffffff;
 
   /* Destructive - Red for debt and dangerous actions */
-  --color-destructive: 0 84.2% 60.2%;
-  --color-destructive-foreground: 210 40% 98%;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
 
   /* Border and input styling */
-  --color-border: 214.3 31.8% 91.4%;
-  --color-input: 214.3 31.8% 91.4%;
-  --color-ring: 221.2 83.2% 53.3%;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #3b82f6;
 
   /* Border radius for consistent component styling */
   --radius: 0.5rem;
 
   /* Chart colors for analytics */
-  --color-chart-1: 12 76% 61%;
-  --color-chart-2: 173 58% 39%;
-  --color-chart-3: 197 37% 24%;
-  --color-chart-4: 43 74% 66%;
-  --color-chart-5: 27 87% 67%;
-}
-
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: 240 10% 3.9%;
-    --color-foreground: 0 0% 98%;
-
-    --color-card: 240 10% 3.9%;
-    --color-card-foreground: 0 0% 98%;
-
-    --color-popover: 240 10% 3.9%;
-    --color-popover-foreground: 0 0% 98%;
-
-    --color-primary: 217.2 91.2% 59.8%;
-    --color-primary-foreground: 222.2 84% 4.9%;
-
-    --color-secondary: 217.2 32.6% 17.5%;
-    --color-secondary-foreground: 210 40% 98%;
-
-    --color-muted: 217.2 32.6% 17.5%;
-    --color-muted-foreground: 215 20.2% 65.1%;
-
-    --color-accent: 217.2 32.6% 17.5%;
-    --color-accent-foreground: 210 40% 98%;
-
-    --color-success: 142.1 70.6% 45.3%;
-    --color-success-foreground: 144.9 80.4% 10%;
-
-    --color-warning: 35.5 91.7% 32.9%;
-    --color-warning-foreground: 210 40% 98%;
-
-    --color-destructive: 0 62.8% 30.6%;
-    --color-destructive-foreground: 210 40% 98%;
-
-    --color-border: 217.2 32.6% 17.5%;
-    --color-input: 217.2 32.6% 17.5%;
-    --color-ring: 224.3 76.3% 48%;
-
-    --color-chart-1: 220 70% 50%;
-    --color-chart-2: 160 60% 45%;
-    --color-chart-3: 30 80% 55%;
-    --color-chart-4: 280 65% 60%;
-    --color-chart-5: 340 75% 55%;
-  }
+  --color-chart-1: #f59e0b;
+  --color-chart-2: #10b981;
+  --color-chart-3: #3b82f6;
+  --color-chart-4: #f59e0b;
+  --color-chart-5: #ef4444;
 }
 
 body {
