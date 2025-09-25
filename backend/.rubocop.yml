@@ -1,8 +1,71 @@
-# Omakase Ruby styling for Rails
+# RuboCop configuration for RoomMate Manager API
+# Optimized for Rails 8.0.3 with Brazilian localization focus
+
+# Inherit base Rails style
 inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
-# Overwrite or add rules to create your own house style
-#
-# # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
-# Layout/SpaceInsideArrayLiteralBrackets:
-#   Enabled: false
+require:
+  - rubocop-rails
+  - rubocop-rspec
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.3
+  TargetRailsVersion: 8.0
+  Exclude:
+    - 'bin/**/*'
+    - 'db/migrate/**/*'
+    - 'db/schema.rb'
+    - 'config/**/*'
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - 'log/**/*'
+    - 'coverage/**/*'
+    - 'Gemfile'
+    - 'Rakefile'
+    - 'config.ru'
+
+# Layout & Style - Customizations
+Layout/LineLength:
+  Max: 120
+  AllowedPatterns:
+    - '\A\s*#' # Allow long comments
+    - 'http[s]?://' # Allow long URLs
+
+# Metrics - Relaxed for Rails API controllers
+Metrics/ClassLength:
+  Max: 150
+  Exclude:
+    - 'app/controllers/**/*'
+    - 'spec/**/*'
+
+Metrics/MethodLength:
+  Max: 25
+  Exclude:
+    - 'spec/**/*'
+
+Metrics/BlockLength:
+  Max: 30
+  Exclude:
+    - 'spec/**/*'
+    - 'config/routes.rb'
+    - 'db/seeds.rb'
+
+# Rails specific optimizations
+Rails/NotNullColumn:
+  Enabled: false # Allow nullable columns when needed
+
+# RSpec specific
+RSpec/ExampleLength:
+  Max: 15
+
+RSpec/MultipleExpectations:
+  Max: 5
+
+RSpec/DescribeClass:
+  Exclude:
+    - 'spec/requests/**/*' # Request specs don't describe classes
+
+# Brazilian localization - Allow Portuguese strings
+Style/AsciiComments:
+  Enabled: false # Allow non-ASCII characters in comments (Portuguese)

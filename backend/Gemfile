@@ -47,11 +47,25 @@ gem "active_model_serializers"
 gem "image_processing", "~> 1.2"
 
 group :development, :test do
+  # Testing framework
+  gem "rspec-rails"
+  gem "factory_bot_rails"
+  gem "faker"
+
+  # Code quality and security
+  gem "rubocop", require: false
+  gem "rubocop-rails", require: false
+  gem "rubocop-rspec", require: false
+  gem "brakeman", require: false
+  gem "bundle-audit", require: false
+
+  # Test formatting and coverage
+  gem "rspec_junit_formatter"
+  gem "simplecov", require: false
+  gem "simplecov-lcov", require: false
+
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
-
-  # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
-  gem "brakeman", require: false
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
